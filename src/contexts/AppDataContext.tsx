@@ -67,6 +67,14 @@ export interface Order {
   notes?: string;
 }
 
+export interface Activity {
+  id: string;
+  type: 'product_added' | 'product_updated' | 'product_deleted' | 'stock_updated' | 'supplier_added' | 'supplier_updated' | 'supplier_deleted' | 'category_added' | 'category_updated' | 'category_deleted' | 'location_added' | 'location_updated' | 'location_deleted' | 'user_added' | 'user_updated' | 'user_deleted' | 'order_created' | 'order_updated' | 'order_deleted' | 'email_sent' | 'data_exported';
+  description: string;
+  timestamp: string;
+  entityName?: string;
+}
+
 interface AppDataContextType {
   // Products
   products: Product[];
@@ -103,6 +111,9 @@ interface AppDataContextType {
   addOrder: (order: Omit<Order, 'id'>) => Promise<void>;
   updateOrder: (id: string, order: Partial<Order>) => Promise<void>;
   deleteOrder: (id: string) => Promise<void>;
+  
+  // Activities
+  activities: Activity[];
   
   // Utility functions
   sendEmail: (to: string, subject: string, message: string) => Promise<void>;
@@ -302,6 +313,37 @@ const initialOrders: Order[] = [
   },
 ];
 
+const initialActivities: Activity[] = [
+  {
+    id: '1',
+    type: 'product_added',
+    description: 'Added new product "Samsung Galaxy S24"',
+    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    entityName: 'Samsung Galaxy S24',
+  },
+  {
+    id: '2',
+    type: 'stock_updated',
+    description: 'Updated stock for "Nike Air Jordan" - Added 50 units',
+    timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+    entityName: 'Nike Air Jordan',
+  },
+  {
+    id: '3',
+    type: 'supplier_added',
+    description: 'New supplier "TechCorp Solutions" added',
+    timestamp: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    entityName: 'TechCorp Solutions',
+  },
+  {
+    id: '4',
+    type: 'order_created',
+    description: 'Purchase order #PO-2024-001 created',
+    timestamp: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
+    entityName: 'PO-2024-001',
+  },
+];
+
 export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
@@ -309,7 +351,17 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [locations, setLocations] = useState<Location[]>(initialLocations);
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [activities, setActivities] = useState<Activity[]>(initialActivities);
   const [isLoading, setIsLoading] = useState(false);
+
+  const addActivity = useCallback((activity: Omit<Activity, 'id' | 'timestamp'>) => {
+    const newActivity: Activity = {
+      ...activity,
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+    };
+    setActivities(prev => [newActivity, ...prev.slice(0, 19)]); // Keep only last 20 activities
+  }, []);
 
   const addProduct = useCallback(async (productData: Omit<Product, 'id' | 'status'>) => {
     setIsLoading(true);
@@ -341,6 +393,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
       }
       
+      // Add activity
+      addActivity({
+        type: 'product_added',
+        description: `Added new product "${newProduct.name}"`,
+        entityName: newProduct.name,
+      });
+      
       toast.success('Product added successfully!');
     } catch (error) {
       console.error('Failed to add product:', error);
@@ -349,15 +408,17 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateProduct = useCallback(async (id: string, productData: Partial<Product>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      let productName = '';
       setProducts(prev => prev.map(product => {
         if (product.id === id) {
+          productName = product.name;
           const updated = { ...product, ...productData };
           // Update status based on stock
           if (productData.stock !== undefined || productData.lowStockThreshold !== undefined) {
@@ -369,6 +430,18 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return product;
       }));
       
+      // Add activity
+      const changes = [];
+      if (productData.stock !== undefined) changes.push(`stock updated to ${productData.stock}`);
+      if (productData.price !== undefined) changes.push(`price updated to $${productData.price}`);
+      if (productData.name !== undefined) changes.push(`name updated to "${productData.name}"`);
+      
+      addActivity({
+        type: 'product_updated',
+        description: `Updated product "${productName}" - ${changes.join(', ')}`,
+        entityName: productName,
+      });
+      
       toast.success('Product updated successfully!');
     } catch (error) {
       console.error('Failed to update product:', error);
@@ -377,7 +450,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteProduct = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -397,6 +470,15 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }));
       }
       
+      // Add activity
+      if (product) {
+        addActivity({
+          type: 'product_deleted',
+          description: `Deleted product "${product.name}"`,
+          entityName: product.name,
+        });
+      }
+      
       toast.success('Product deleted successfully!');
     } catch (error) {
       console.error('Failed to delete product:', error);
@@ -405,7 +487,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, [products]);
+  }, [products, addActivity]);
 
   const addSupplier = useCallback(async (supplierData: Omit<Supplier, 'id' | 'products' | 'totalOrders' | 'status'>) => {
     setIsLoading(true);
@@ -422,6 +504,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       
       setSuppliers(prev => [newSupplier, ...prev]);
+      
+      // Add activity
+      addActivity({
+        type: 'supplier_added',
+        description: `New supplier "${newSupplier.name}" added`,
+        entityName: newSupplier.name,
+      });
+      
       toast.success('Supplier added successfully!');
     } catch (error) {
       toast.error('Failed to add supplier. Please try again.');
@@ -429,16 +519,28 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateSupplier = useCallback(async (id: string, supplierData: Partial<Supplier>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setSuppliers(prev => prev.map(supplier => 
-        supplier.id === id ? { ...supplier, ...supplierData } : supplier
-      ));
+      let supplierName = '';
+      setSuppliers(prev => prev.map(supplier => {
+        if (supplier.id === id) {
+          supplierName = supplier.name;
+          return { ...supplier, ...supplierData };
+        }
+        return supplier;
+      }));
+      
+      // Add activity
+      addActivity({
+        type: 'supplier_updated',
+        description: `Updated supplier "${supplierName}"`,
+        entityName: supplierName,
+      });
       
       toast.success('Supplier updated successfully!');
     } catch (error) {
@@ -448,7 +550,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteSupplier = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -462,7 +564,18 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
       
+      const supplier = suppliers.find(s => s.id === id);
       setSuppliers(prev => prev.filter(s => s.id !== id));
+      
+      // Add activity
+      if (supplier) {
+        addActivity({
+          type: 'supplier_deleted',
+          description: `Deleted supplier "${supplier.name}"`,
+          entityName: supplier.name,
+        });
+      }
+      
       toast.success('Supplier deleted successfully!');
     } catch (error) {
       console.error('Failed to delete supplier:', error);
@@ -471,7 +584,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, [products]);
+  }, [products, suppliers, addActivity]);
 
   const addCategory = useCallback(async (categoryData: Omit<Category, 'id' | 'productCount'>) => {
     setIsLoading(true);
@@ -486,6 +599,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       
       setCategories(prev => [newCategory, ...prev]);
+      
+      // Add activity
+      addActivity({
+        type: 'category_added',
+        description: `New category "${newCategory.name}" added`,
+        entityName: newCategory.name,
+      });
+      
       toast.success('Category added successfully!');
     } catch (error) {
       toast.error('Failed to add category. Please try again.');
@@ -493,16 +614,28 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateCategory = useCallback(async (id: string, categoryData: Partial<Category>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setCategories(prev => prev.map(category => 
-        category.id === id ? { ...category, ...categoryData } : category
-      ));
+      let categoryName = '';
+      setCategories(prev => prev.map(category => {
+        if (category.id === id) {
+          categoryName = category.name;
+          return { ...category, ...categoryData };
+        }
+        return category;
+      }));
+      
+      // Add activity
+      addActivity({
+        type: 'category_updated',
+        description: `Updated category "${categoryName}"`,
+        entityName: categoryName,
+      });
       
       toast.success('Category updated successfully!');
     } catch (error) {
@@ -512,7 +645,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteCategory = useCallback(async (id: string) => {
     setIsLoading(true);
@@ -526,7 +659,18 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
         return;
       }
       
+      const category = categories.find(c => c.id === id);
       setCategories(prev => prev.filter(c => c.id !== id));
+      
+      // Add activity
+      if (category) {
+        addActivity({
+          type: 'category_deleted',
+          description: `Deleted category "${category.name}"`,
+          entityName: category.name,
+        });
+      }
+      
       toast.success('Category deleted successfully!');
     } catch (error) {
       console.error('Failed to delete category:', error);
@@ -535,7 +679,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, [products]);
+  }, [products, categories, addActivity]);
 
   const addLocation = useCallback(async (locationData: Omit<Location, 'id' | 'status'>) => {
     setIsLoading(true);
@@ -550,6 +694,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       
       setLocations(prev => [newLocation, ...prev]);
+      
+      // Add activity
+      addActivity({
+        type: 'location_added',
+        description: `New location "${newLocation.name}" added`,
+        entityName: newLocation.name,
+      });
+      
       toast.success('Location added successfully!');
     } catch (error) {
       toast.error('Failed to add location. Please try again.');
@@ -557,16 +709,28 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateLocation = useCallback(async (id: string, locationData: Partial<Location>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setLocations(prev => prev.map(location => 
-        location.id === id ? { ...location, ...locationData } : location
-      ));
+      let locationName = '';
+      setLocations(prev => prev.map(location => {
+        if (location.id === id) {
+          locationName = location.name;
+          return { ...location, ...locationData };
+        }
+        return location;
+      }));
+      
+      // Add activity
+      addActivity({
+        type: 'location_updated',
+        description: `Updated location "${locationName}"`,
+        entityName: locationName,
+      });
       
       toast.success('Location updated successfully!');
     } catch (error) {
@@ -576,14 +740,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteLocation = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      const location = locations.find(l => l.id === id);
       setLocations(prev => prev.filter(l => l.id !== id));
+      
+      // Add activity
+      if (location) {
+        addActivity({
+          type: 'location_deleted',
+          description: `Deleted location "${location.name}"`,
+          entityName: location.name,
+        });
+      }
+      
       toast.success('Location deleted successfully!');
     } catch (error) {
       console.error('Failed to delete location:', error);
@@ -592,7 +767,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [locations, addActivity]);
 
   const addUser = useCallback(async (userData: Omit<User, 'id' | 'status'>) => {
     setIsLoading(true);
@@ -606,6 +781,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       
       setUsers(prev => [newUser, ...prev]);
+      
+      // Add activity
+      addActivity({
+        type: 'user_added',
+        description: `New user "${newUser.name}" added`,
+        entityName: newUser.name,
+      });
+      
       toast.success('User added successfully!');
     } catch (error) {
       console.error('Failed to add user:', error);
@@ -614,16 +797,28 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateUser = useCallback(async (id: string, userData: Partial<User>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setUsers(prev => prev.map(user => 
-        user.id === id ? { ...user, ...userData } : user
-      ));
+      let userName = '';
+      setUsers(prev => prev.map(user => {
+        if (user.id === id) {
+          userName = user.name;
+          return { ...user, ...userData };
+        }
+        return user;
+      }));
+      
+      // Add activity
+      addActivity({
+        type: 'user_updated',
+        description: `Updated user "${userName}"`,
+        entityName: userName,
+      });
       
       toast.success('User updated successfully!');
     } catch (error) {
@@ -633,14 +828,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteUser = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      const user = users.find(u => u.id === id);
       setUsers(prev => prev.filter(u => u.id !== id));
+      
+      // Add activity
+      if (user) {
+        addActivity({
+          type: 'user_deleted',
+          description: `Deleted user "${user.name}"`,
+          entityName: user.name,
+        });
+      }
+      
       toast.success('User deleted successfully!');
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -649,7 +855,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [users, addActivity]);
 
   const addOrder = useCallback(async (orderData: Omit<Order, 'id'>) => {
     setIsLoading(true);
@@ -662,6 +868,14 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       };
       
       setOrders(prev => [newOrder, ...prev]);
+      
+      // Add activity
+      addActivity({
+        type: 'order_created',
+        description: `Purchase order "${newOrder.orderNumber}" created`,
+        entityName: newOrder.orderNumber,
+      });
+      
       toast.success('Order created successfully!');
     } catch (error) {
       console.error('Failed to create order:', error);
@@ -670,16 +884,32 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const updateOrder = useCallback(async (id: string, orderData: Partial<Order>) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      setOrders(prev => prev.map(order => 
-        order.id === id ? { ...order, ...orderData } : order
-      ));
+      let orderNumber = '';
+      setOrders(prev => prev.map(order => {
+        if (order.id === id) {
+          orderNumber = order.orderNumber;
+          return { ...order, ...orderData };
+        }
+        return order;
+      }));
+      
+      // Add activity
+      const changes = [];
+      if (orderData.status !== undefined) changes.push(`status updated to ${orderData.status}`);
+      if (orderData.totalAmount !== undefined) changes.push(`amount updated to $${orderData.totalAmount}`);
+      
+      addActivity({
+        type: 'order_updated',
+        description: `Updated order "${orderNumber}" - ${changes.join(', ')}`,
+        entityName: orderNumber,
+      });
       
       toast.success('Order updated successfully!');
     } catch (error) {
@@ -689,14 +919,25 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const deleteOrder = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 500));
       
+      const order = orders.find(o => o.id === id);
       setOrders(prev => prev.filter(o => o.id !== id));
+      
+      // Add activity
+      if (order) {
+        addActivity({
+          type: 'order_deleted',
+          description: `Deleted order "${order.orderNumber}"`,
+          entityName: order.orderNumber,
+        });
+      }
+      
       toast.success('Order deleted successfully!');
     } catch (error) {
       console.error('Failed to delete order:', error);
@@ -705,13 +946,21 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [orders, addActivity]);
 
   const sendEmail = useCallback(async (to: string, subject: string, message: string) => {
     setIsLoading(true);
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
       console.log(`Email sent to ${to}: ${subject}`);
+      
+      // Add activity
+      addActivity({
+        type: 'email_sent',
+        description: `Email sent to ${to}: "${subject}"`,
+        entityName: to,
+      });
+      
       toast.success(`Email sent successfully to ${to}!`);
     } catch (error) {
       console.error('Failed to send email:', error);
@@ -720,7 +969,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [addActivity]);
 
   const exportData = useCallback(async (type: 'products' | 'suppliers' | 'categories' | 'orders', format: 'csv' | 'pdf') => {
     setIsLoading(true);
@@ -739,6 +988,13 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const filename = `${type}_export_${new Date().toISOString().split('T')[0]}.${format}`;
       console.log(`Exporting ${data.length} ${type} records to ${filename}`);
       
+      // Add activity
+      addActivity({
+        type: 'data_exported',
+        description: `Exported ${data.length} ${type} records as ${format.toUpperCase()}`,
+        entityName: `${type}_export.${format}`,
+      });
+      
       toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} exported successfully as ${format.toUpperCase()}!`);
     } catch (error) {
       console.error('Failed to export data:', error);
@@ -747,7 +1003,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setIsLoading(false);
     }
-  }, [products, suppliers, categories, orders]);
+  }, [products, suppliers, categories, orders, addActivity]);
 
   const value: AppDataContextType = {
     products,
@@ -774,6 +1030,7 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
     addOrder,
     updateOrder,
     deleteOrder,
+    activities,
     sendEmail,
     exportData,
     isLoading,
