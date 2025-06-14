@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext } from 'react';
 import { 
   useCategories, 
@@ -18,6 +17,8 @@ import {
   useUpdateProduct,
   useDeleteProduct,
   useCreateActivity,
+} from '@/hooks/useSupabaseData';
+import type {
   Category,
   Supplier,
   Product,
@@ -25,7 +26,7 @@ import {
   User,
   Order,
   Activity
-} from '@/hooks/useSupabaseData';
+} from '@/types/database';
 import { toast } from 'sonner';
 
 interface SupabaseDataContextType {
