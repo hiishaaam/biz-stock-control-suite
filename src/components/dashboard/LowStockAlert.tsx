@@ -3,14 +3,66 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAppData } from '@/contexts/AppDataContext';
 
 const LowStockAlert = () => {
+  const { sendEmail, suppliers } = useAppData();
+  
   const lowStockItems = [
-    { name: 'iPhone 13 Pro', category: 'Electronics', stock: 3, threshold: 10 },
-    { name: 'Nike Air Max', category: 'Footwear', stock: 2, threshold: 5 },
-    { name: 'Coffee Beans Premium', category: 'Food', stock: 1, threshold: 8 },
-    { name: 'Laptop Stand', category: 'Accessories', stock: 4, threshold: 12 },
+    { name: 'iPhone 13 Pro', category: 'Electronics', stock: 3, threshold: 10, supplierId: 'apple' },
+    { name: 'Nike Air Max', category: 'Footwear', stock: 2, threshold: 5, supplierId: 'nike' },
+    { name: 'Coffee Beans Premium', category: 'Food', stock: 1, threshold: 8, supplierId: 'coffee-corp' },
+    { name: 'Laptop Stand', category: 'Accessories', stock: 4, threshold: 12, supplierId: 'apple' },
   ];
+
+  const handleReorderAll = async () => {
+    try {
+      // Group items by supplier
+      const itemsBySupplier = lowStockItems.reduce((acc, item) => {
+        if (!acc[item.supplierId]) {
+          acc[item.supplierId] = [];
+        }
+        acc[item.supplierId].push(item);
+        return acc;
+      }, {} as Record<string, typeof lowStockItems>);
+
+      // Send email to each supplier
+      for (const [supplierId, items] of Object.entries(itemsBySupplier)) {
+        const supplier = suppliers.find(s => s.id === supplierId);
+        if (supplier) {
+          const itemsList = items.map(item => 
+            `- ${item.name} (Current: ${item.stock}, Minimum: ${item.threshold})`
+          ).join('\n');
+
+          const subject = 'Urgent: Restock Request for Low Inventory Items';
+          const message = `Dear ${supplier.contact || supplier.name},
+
+We hope this message finds you well. We are writing to request immediate restocking of the following items that have fallen below our minimum inventory levels:
+
+${itemsList}
+
+Please arrange for expedited delivery of these items to ensure we can continue serving our customers without interruption.
+
+Order Details Needed:
+- Estimated delivery time
+- Quantity available for immediate shipment
+- Updated pricing if applicable
+
+Please confirm receipt of this request and provide an estimated delivery schedule at your earliest convenience.
+
+Thank you for your continued partnership.
+
+Best regards,
+Inventory Management Team`;
+
+          await sendEmail(supplier.email, subject, message);
+        }
+      }
+    } catch (error) {
+      // Error handling is done in the context
+      console.error('Failed to send restock emails:', error);
+    }
+  };
 
   return (
     <Card className="border-orange-200">
@@ -40,7 +92,10 @@ const LowStockAlert = () => {
             </div>
           ))}
         </div>
-        <Button className="w-full mt-3 sm:mt-4 bg-orange-600 hover:bg-orange-700 text-sm sm:text-base">
+        <Button 
+          className="w-full mt-3 sm:mt-4 bg-orange-600 hover:bg-orange-700 text-sm sm:text-base"
+          onClick={handleReorderAll}
+        >
           Reorder All Low Stock Items
         </Button>
       </CardContent>
