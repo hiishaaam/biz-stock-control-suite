@@ -198,7 +198,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="stock">Initial Stock *</Label>
+              <Label htmlFor="stock">Current Stock Level *</Label>
               <Input
                 id="stock"
                 type="number"
@@ -212,7 +212,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="low_stock_threshold">Low Stock Alert</Label>
+            <Label htmlFor="low_stock_threshold">Low Stock Alert Threshold</Label>
             <Input
               id="low_stock_threshold"
               type="number"
@@ -222,6 +222,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
               className={errors.low_stock_threshold ? 'border-red-500' : ''}
             />
             {errors.low_stock_threshold && <p className="text-sm text-red-500">{errors.low_stock_threshold}</p>}
+            <p className="text-sm text-gray-500">Get notified when stock falls below this level</p>
           </div>
 
           <div className="space-y-2">

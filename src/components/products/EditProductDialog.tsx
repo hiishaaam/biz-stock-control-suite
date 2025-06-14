@@ -11,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useProducts, useSuppliers, useCategories } from '@/hooks/useSupabaseQueries';
+import { useUpdateProduct } from '@/hooks/useProductMutations';
 import { Loader2 } from 'lucide-react';
 
 interface EditProductDialogProps {
@@ -21,16 +22,19 @@ interface EditProductDialogProps {
 }
 
 const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, onOpenChange }) => {
-  const { products, suppliers, categories, updateProduct, isLoading } = useAppData();
+  const { data: products = [] } = useProducts();
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: categories = [] } = useCategories();
+  const updateProduct = useUpdateProduct();
+  
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
-    category: '',
+    category_id: '',
     price: '',
-    cost: '',
     stock: '',
-    lowStockThreshold: '',
-    supplier: '',
+    low_stock_threshold: '',
+    supplier_id: '',
     description: '',
   });
 
@@ -38,15 +42,15 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
 
   useEffect(() => {
     if (product) {
+      console.log('EditProductDialog - Product found:', product);
       setFormData({
-        name: product.name,
-        sku: product.sku,
-        category: product.category,
-        price: product.price.toString(),
-        cost: product.cost?.toString() || '',
-        stock: product.stock.toString(),
-        lowStockThreshold: product.lowStockThreshold.toString(),
-        supplier: product.supplier,
+        name: product.name || '',
+        sku: product.sku || '',
+        category_id: product.category_id || '',
+        price: product.price?.toString() || '',
+        stock: product.stock?.toString() || '0',
+        low_stock_threshold: product.low_stock_threshold?.toString() || '10',
+        supplier_id: product.supplier_id || '',
         description: product.description || '',
       });
     }
@@ -55,26 +59,34 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('EditProductDialog - Submitting form:', formData);
+    
     try {
-      await updateProduct(productId, {
+      const updateData = {
+        id: productId,
         name: formData.name.trim(),
         sku: formData.sku.trim(),
-        category: formData.category,
+        category_id: formData.category_id || null,
+        supplier_id: formData.supplier_id || null,
         price: parseFloat(formData.price) || 0,
-        cost: formData.cost ? parseFloat(formData.cost) : undefined,
         stock: parseInt(formData.stock) || 0,
-        lowStockThreshold: parseInt(formData.lowStockThreshold) || 0,
-        supplier: formData.supplier,
-        description: formData.description.trim() || undefined,
-      });
+        low_stock_threshold: parseInt(formData.low_stock_threshold) || 10,
+        description: formData.description.trim() || null,
+      };
 
+      console.log('EditProductDialog - Update data:', updateData);
+      
+      await updateProduct.mutateAsync(updateData);
       onOpenChange(false);
     } catch (error) {
-      // Error is handled in the context
+      console.error('EditProductDialog - Error updating product:', error);
     }
   };
 
-  if (!product) return null;
+  if (!product) {
+    console.log('EditProductDialog - Product not found for ID:', productId);
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -108,8 +120,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+              <Label htmlFor="category_id">Category</Label>
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -124,8 +136,8 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier</Label>
-              <Select value={formData.supplier} onValueChange={(value) => setFormData({ ...formData, supplier: value })}>
+              <Label htmlFor="supplier_id">Supplier</Label>
+              <Select value={formData.supplier_id} onValueChange={(value) => setFormData({ ...formData, supplier_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select supplier" />
                 </SelectTrigger>
@@ -155,22 +167,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cost">Cost ($)</Label>
-              <Input
-                id="cost"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.cost}
-                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="stock">Stock Quantity</Label>
+              <Label htmlFor="stock">Current Stock Level</Label>
               <Input
                 id="stock"
                 type="number"
@@ -180,18 +177,18 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
                 placeholder="0"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lowStockThreshold">Low Stock Threshold</Label>
-              <Input
-                id="lowStockThreshold"
-                type="number"
-                min="0"
-                value={formData.lowStockThreshold}
-                onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
-                placeholder="0"
-              />
-            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="low_stock_threshold">Low Stock Threshold</Label>
+            <Input
+              id="low_stock_threshold"
+              type="number"
+              min="0"
+              value={formData.low_stock_threshold}
+              onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+              placeholder="10"
+            />
           </div>
           
           <div className="space-y-2">
@@ -206,11 +203,11 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={updateProduct.isPending}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={updateProduct.isPending}>
+              {updateProduct.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Updating Product...
