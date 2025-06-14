@@ -27,32 +27,33 @@ const ExportButton: React.FC<ExportButtonProps> = ({ type, className = '' }) => 
     
     try {
       let filename = '';
+      let data = [];
+      
+      // Get the correct data based on type
+      switch (type) {
+        case 'products':
+          data = products;
+          break;
+        case 'suppliers':
+          data = suppliers;
+          break;
+        case 'categories':
+          data = categories;
+          break;
+        case 'orders':
+          data = orders;
+          break;
+      }
+      
+      console.log(`Exporting ${data.length} ${type} records`);
       
       if (format === 'pdf') {
-        // For PDF, we'll use the inventory report generator as a base
-        // and adapt it for different data types
-        let data = [];
-        switch (type) {
-          case 'products':
-            data = products;
-            break;
-          case 'suppliers':
-            data = suppliers;
-            break;
-          case 'categories':
-            data = categories;
-            break;
-          case 'orders':
-            data = orders;
-            break;
-        }
-        
         const doc = generateInventoryReport(data);
         filename = `${type}_export_${new Date().toISOString().split('T')[0]}.pdf`;
         doc.save(filename);
       } else {
-        // CSV format
-        const csvContent = generateCSVReport(type, []);
+        // CSV format - now passing the actual data
+        const csvContent = generateCSVReport(type, data);
         filename = `${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
         
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -68,7 +69,7 @@ const ExportButton: React.FC<ExportButtonProps> = ({ type, className = '' }) => 
       
       toast({
         title: "Export Successful",
-        description: `${type.charAt(0).toUpperCase() + type.slice(1)} exported successfully as ${format.toUpperCase()}!`,
+        description: `${data.length} ${type} exported successfully as ${format.toUpperCase()}!`,
       });
       
       console.log(`Generated ${format.toUpperCase()} export: ${filename}`);

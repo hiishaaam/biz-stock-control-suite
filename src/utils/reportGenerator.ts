@@ -174,34 +174,49 @@ export const generateCSVReport = (type: string, data: any[]) => {
   let csvContent = '';
   
   switch (type) {
-    case 'inventory':
-      csvContent = 'Product Name,Category,Stock Level,Value\n';
-      csvContent += 'iPhone 15 Pro,Electronics,45,$44955\n';
-      csvContent += 'Nike Air Max 90,Footwear,23,$2990\n';
-      csvContent += 'MacBook Pro 16",Electronics,12,$29988\n';
-      csvContent += 'Coffee Beans Premium,Food & Beverage,156,$3900\n';
+    case 'products':
+      csvContent = 'Name,SKU,Price,Stock,Low Stock Threshold,Description\n';
+      data.forEach(item => {
+        const name = (item.name || '').replace(/"/g, '""');
+        const sku = (item.sku || '').replace(/"/g, '""');
+        const description = (item.description || '').replace(/"/g, '""');
+        csvContent += `"${name}","${sku}",${item.price || 0},${item.stock || 0},${item.low_stock_threshold || 0},"${description}"\n`;
+      });
       break;
-    case 'sales':
-      csvContent = 'Period,Revenue,Items Sold\n';
-      csvContent += 'January 2024,$4000,240\n';
-      csvContent += 'February 2024,$3000,198\n';
-      csvContent += 'March 2024,$5000,310\n';
-      csvContent += 'April 2024,$4500,278\n';
+      
+    case 'suppliers':
+      csvContent = 'Name,Email,Phone,Address,Status,Products Count,Total Orders\n';
+      data.forEach(item => {
+        const name = (item.name || '').replace(/"/g, '""');
+        const email = (item.email || '').replace(/"/g, '""');
+        const phone = (item.phone || '').replace(/"/g, '""');
+        const address = (item.address || '').replace(/"/g, '""');
+        csvContent += `"${name}","${email}","${phone}","${address}",${item.status || 'active'},${item.products || 0},${item.total_orders || 0}\n`;
+      });
       break;
-    case 'movement':
-      csvContent = 'Date,Item,Type,Quantity\n';
-      csvContent += '2024-06-10,iPhone 15 Pro,IN,25\n';
-      csvContent += '2024-06-11,Nike Air Max 90,OUT,15\n';
-      csvContent += '2024-06-12,MacBook Pro 16",IN,8\n';
-      csvContent += '2024-06-13,Wireless Headphones,OUT,12\n';
+      
+    case 'categories':
+      csvContent = 'Name,Description,Created At\n';
+      data.forEach(item => {
+        const name = (item.name || '').replace(/"/g, '""');
+        const description = (item.description || '').replace(/"/g, '""');
+        const createdAt = item.created_at ? new Date(item.created_at).toLocaleDateString() : '';
+        csvContent += `"${name}","${description}","${createdAt}"\n`;
+      });
       break;
-    case 'lowstock':
-      csvContent = 'Product Name,Current Stock,Min Threshold,Supplier\n';
-      csvContent += 'MacBook Pro 16",3,10,Apple Inc.\n';
-      csvContent += 'Wireless Mouse,5,15,Logitech\n';
-      csvContent += 'Coffee Beans Premium,8,20,Coffee Co.\n';
-      csvContent += 'Desk Lamp LED,2,12,IKEA\n';
+      
+    case 'orders':
+      csvContent = 'Order Number,Status,Total Amount,Order Date,Expected Delivery\n';
+      data.forEach(item => {
+        const orderNumber = (item.order_number || '').replace(/"/g, '""');
+        const orderDate = item.order_date ? new Date(item.order_date).toLocaleDateString() : '';
+        const expectedDelivery = item.expected_delivery ? new Date(item.expected_delivery).toLocaleDateString() : '';
+        csvContent += `"${orderNumber}",${item.status || 'pending'},${item.total_amount || 0},"${orderDate}","${expectedDelivery}"\n`;
+      });
       break;
+      
+    default:
+      csvContent = 'No data available\n';
   }
   
   return csvContent;
