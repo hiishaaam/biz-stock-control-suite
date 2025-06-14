@@ -9,13 +9,13 @@ const MobileSidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Package, label: 'Products', path: '/dashboard/products' },
-    { icon: Archive, label: 'Categories', path: '/dashboard/categories' },
-    { icon: Database, label: 'Inventory', path: '/dashboard/inventory' },
-    { icon: User, label: 'Suppliers', path: '/dashboard/suppliers' },
-    { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
-    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
+    { icon: Home, label: 'Dashboard', path: '/' },
+    { icon: Package, label: 'Products', path: '/products' },
+    { icon: Archive, label: 'Categories', path: '/categories' },
+    { icon: Database, label: 'Inventory', path: '/inventory' },
+    { icon: User, label: 'Suppliers', path: '/suppliers' },
+    { icon: BarChart3, label: 'Reports', path: '/reports' },
+    { icon: Settings, label: 'Settings', path: '/settings' },
   ];
 
   const toggleSidebar = () => setIsOpen(!isOpen);
@@ -44,7 +44,7 @@ const MobileSidebar = () => {
           {/* Sidebar */}
           <div className="fixed left-0 top-0 h-full w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out">
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
-              <Link to="/" className="flex items-center space-x-3" onClick={toggleSidebar}>
+              <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
                   <Package className="w-5 h-5 text-white" />
                 </div>
@@ -52,7 +52,7 @@ const MobileSidebar = () => {
                   <h1 className="text-lg font-bold text-gray-900">InvenTrack</h1>
                   <p className="text-xs text-gray-500">Inventory Management</p>
                 </div>
-              </Link>
+              </div>
               <Button variant="ghost" size="icon" onClick={toggleSidebar}>
                 <X className="w-5 h-5" />
               </Button>
