@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
@@ -214,9 +213,26 @@ export const AppDataProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 productData.stock <= productData.lowStockThreshold ? 'low_stock' : 'active'
       };
       
+      // Add the product to the products array
       setProducts(prev => [newProduct, ...prev]);
+      
+      // Update the supplier's product count if a supplier is associated
+      if (productData.supplier) {
+        setSuppliers(prev => prev.map(supplier => {
+          if (supplier.id === productData.supplier) {
+            console.log(`Updating supplier ${supplier.name} product count from ${supplier.products} to ${supplier.products + 1}`);
+            return {
+              ...supplier,
+              products: supplier.products + 1
+            };
+          }
+          return supplier;
+        }));
+      }
+      
       toast.success('Product added successfully!');
     } catch (error) {
+      console.error('Failed to add product:', error);
       toast.error('Failed to add product. Please try again.');
       throw error;
     } finally {
