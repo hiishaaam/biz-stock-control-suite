@@ -7,19 +7,19 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/' },
-    { icon: Package, label: 'Products', path: '/products' },
-    { icon: Archive, label: 'Categories', path: '/categories' },
-    { icon: Database, label: 'Inventory', path: '/inventory' },
-    { icon: User, label: 'Suppliers', path: '/suppliers' },
-    { icon: BarChart3, label: 'Reports', path: '/reports' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Home, label: 'Dashboard', path: '/dashboard' },
+    { icon: Package, label: 'Products', path: '/dashboard/products' },
+    { icon: Archive, label: 'Categories', path: '/dashboard/categories' },
+    { icon: Database, label: 'Inventory', path: '/dashboard/inventory' },
+    { icon: User, label: 'Suppliers', path: '/dashboard/suppliers' },
+    { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
+    { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];
 
   return (
     <div className="w-64 bg-white shadow-lg border-r border-gray-200 h-screen fixed lg:sticky top-0">
       <div className="p-4 lg:p-6 border-b border-gray-200">
-        <div className="flex items-center space-x-3">
+        <Link to="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Package className="w-5 h-5 text-white" />
           </div>
@@ -27,7 +27,7 @@ const Sidebar = () => {
             <h1 className="text-lg lg:text-xl font-bold text-gray-900">InvenTrack</h1>
             <p className="text-xs lg:text-sm text-gray-500">Inventory Management</p>
           </div>
-        </div>
+        </Link>
       </div>
       
       <nav className="mt-4 lg:mt-6 overflow-y-auto h-[calc(100vh-100px)]">
