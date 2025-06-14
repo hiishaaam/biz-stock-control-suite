@@ -31,6 +31,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
     name: '',
     sku: '',
     category_id: '',
+    cost: '',
     price: '',
     stock: '',
     low_stock_threshold: '',
@@ -47,6 +48,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
         name: product.name || '',
         sku: product.sku || '',
         category_id: product.category_id || '',
+        cost: product.cost?.toString() || '',
         price: product.price?.toString() || '',
         stock: product.stock?.toString() || '0',
         low_stock_threshold: product.low_stock_threshold?.toString() || '10',
@@ -68,6 +70,7 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
         sku: formData.sku.trim(),
         category_id: formData.category_id || null,
         supplier_id: formData.supplier_id || null,
+        cost: formData.cost ? parseFloat(formData.cost) : null,
         price: parseFloat(formData.price) || 0,
         stock: parseInt(formData.stock) || 0,
         low_stock_threshold: parseInt(formData.low_stock_threshold) || 10,
@@ -154,7 +157,21 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price ($)</Label>
+              <Label htmlFor="cost">Cost Price</Label>
+              <Input
+                id="cost"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.cost}
+                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                placeholder="0.00"
+              />
+              <p className="text-sm text-gray-500">What you paid for this product</p>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="price">Selling Price</Label>
               <Input
                 id="price"
                 type="number"
@@ -164,8 +181,11 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0.00"
               />
+              <p className="text-sm text-gray-500">What you sell this product for</p>
             </div>
-            
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="stock">Current Stock Level</Label>
               <Input
@@ -177,18 +197,18 @@ const EditProductDialog: React.FC<EditProductDialogProps> = ({ productId, open, 
                 placeholder="0"
               />
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="low_stock_threshold">Low Stock Threshold</Label>
-            <Input
-              id="low_stock_threshold"
-              type="number"
-              min="0"
-              value={formData.low_stock_threshold}
-              onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
-              placeholder="10"
-            />
+            
+            <div className="space-y-2">
+              <Label htmlFor="low_stock_threshold">Low Stock Threshold</Label>
+              <Input
+                id="low_stock_threshold"
+                type="number"
+                min="0"
+                value={formData.low_stock_threshold}
+                onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+                placeholder="10"
+              />
+            </div>
           </div>
           
           <div className="space-y-2">

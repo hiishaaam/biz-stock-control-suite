@@ -35,6 +35,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
     name: '',
     sku: '',
     category_id: '',
+    cost: '',
     price: '',
     stock: '',
     low_stock_threshold: '',
@@ -54,6 +55,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
     }
     if (!formData.category_id) {
       newErrors.category_id = 'Category is required';
+    }
+    if (formData.cost && parseFloat(formData.cost) < 0) {
+      newErrors.cost = 'Cost must be 0 or greater';
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
       newErrors.price = 'Valid selling price is required';
@@ -85,6 +89,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
         sku: formData.sku.trim(),
         category_id: formData.category_id || null,
         supplier_id: formData.supplier_id || null,
+        cost: formData.cost ? parseFloat(formData.cost) : null,
         price: parseFloat(formData.price),
         stock: parseInt(formData.stock),
         low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : 10,
@@ -100,6 +105,7 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
         name: '',
         sku: '',
         category_id: '',
+        cost: '',
         price: '',
         stock: '',
         low_stock_threshold: '',
@@ -184,24 +190,45 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
+              <Label htmlFor="cost">Cost Price</Label>
+              <Input
+                id="cost"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formData.cost}
+                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
+                placeholder="0.00"
+                className={errors.cost ? 'border-red-500' : ''}
+              />
+              {errors.cost && <p className="text-sm text-red-500">{errors.cost}</p>}
+              <p className="text-sm text-gray-500">What you paid for this product</p>
+            </div>
+            
+            <div className="space-y-2">
               <Label htmlFor="price">Selling Price *</Label>
               <Input
                 id="price"
                 type="number"
                 step="0.01"
+                min="0"
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0.00"
                 className={errors.price ? 'border-red-500' : ''}
               />
               {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
+              <p className="text-sm text-gray-500">What you sell this product for</p>
             </div>
-            
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="stock">Current Stock Level *</Label>
               <Input
                 id="stock"
                 type="number"
+                min="0"
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 placeholder="0"
@@ -209,20 +236,21 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
               />
               {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="low_stock_threshold">Low Stock Alert Threshold</Label>
-            <Input
-              id="low_stock_threshold"
-              type="number"
-              value={formData.low_stock_threshold}
-              onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
-              placeholder="10"
-              className={errors.low_stock_threshold ? 'border-red-500' : ''}
-            />
-            {errors.low_stock_threshold && <p className="text-sm text-red-500">{errors.low_stock_threshold}</p>}
-            <p className="text-sm text-gray-500">Get notified when stock falls below this level</p>
+            <div className="space-y-2">
+              <Label htmlFor="low_stock_threshold">Low Stock Alert Threshold</Label>
+              <Input
+                id="low_stock_threshold"
+                type="number"
+                min="0"
+                value={formData.low_stock_threshold}
+                onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+                placeholder="10"
+                className={errors.low_stock_threshold ? 'border-red-500' : ''}
+              />
+              {errors.low_stock_threshold && <p className="text-sm text-red-500">{errors.low_stock_threshold}</p>}
+              <p className="text-sm text-gray-500">Get notified when stock falls below this level</p>
+            </div>
           </div>
 
           <div className="space-y-2">

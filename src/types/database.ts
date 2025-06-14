@@ -31,6 +31,7 @@ export interface Product {
   category_id?: string;
   supplier_id?: string;
   price: number;
+  cost?: number;
   stock: number;
   low_stock_threshold: number;
   description?: string;
