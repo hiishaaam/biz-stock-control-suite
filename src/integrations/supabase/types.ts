@@ -266,6 +266,24 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          id: string
+          permission: Database["public"]["Enums"]["permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          id?: string
+          permission: Database["public"]["Enums"]["permission"]
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          id?: string
+          permission?: Database["public"]["Enums"]["permission"]
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -305,6 +323,30 @@ export type Database = {
           status?: Database["public"]["Enums"]["supplier_status"] | null
           total_orders?: number | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -363,7 +405,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_permissions: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["permission"][]
+      }
+      get_user_roles: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"][]
+      }
+      has_permission: {
+        Args: {
+          _user_id: string
+          _permission: Database["public"]["Enums"]["permission"]
+        }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       activity_type:
@@ -388,6 +451,7 @@ export type Database = {
         | "stock_updated"
         | "email_sent"
         | "data_exported"
+      app_role: "admin" | "manager" | "staff"
       location_type: "warehouse" | "store" | "distribution"
       order_status:
         | "pending"
@@ -395,6 +459,35 @@ export type Database = {
         | "shipped"
         | "delivered"
         | "cancelled"
+      permission:
+        | "view_dashboard"
+        | "view_products"
+        | "create_products"
+        | "edit_products"
+        | "delete_products"
+        | "view_categories"
+        | "create_categories"
+        | "edit_categories"
+        | "delete_categories"
+        | "view_suppliers"
+        | "create_suppliers"
+        | "edit_suppliers"
+        | "delete_suppliers"
+        | "view_inventory"
+        | "manage_inventory"
+        | "view_locations"
+        | "manage_locations"
+        | "view_orders"
+        | "create_orders"
+        | "edit_orders"
+        | "delete_orders"
+        | "view_users"
+        | "create_users"
+        | "edit_users"
+        | "delete_users"
+        | "view_reports"
+        | "export_data"
+        | "manage_settings"
       supplier_status: "active" | "inactive"
       user_role: "admin" | "manager" | "employee"
       user_status: "active" | "inactive"
@@ -536,6 +629,7 @@ export const Constants = {
         "email_sent",
         "data_exported",
       ],
+      app_role: ["admin", "manager", "staff"],
       location_type: ["warehouse", "store", "distribution"],
       order_status: [
         "pending",
@@ -543,6 +637,36 @@ export const Constants = {
         "shipped",
         "delivered",
         "cancelled",
+      ],
+      permission: [
+        "view_dashboard",
+        "view_products",
+        "create_products",
+        "edit_products",
+        "delete_products",
+        "view_categories",
+        "create_categories",
+        "edit_categories",
+        "delete_categories",
+        "view_suppliers",
+        "create_suppliers",
+        "edit_suppliers",
+        "delete_suppliers",
+        "view_inventory",
+        "manage_inventory",
+        "view_locations",
+        "manage_locations",
+        "view_orders",
+        "create_orders",
+        "edit_orders",
+        "delete_orders",
+        "view_users",
+        "create_users",
+        "edit_users",
+        "delete_users",
+        "view_reports",
+        "export_data",
+        "manage_settings",
       ],
       supplier_status: ["active", "inactive"],
       user_role: ["admin", "manager", "employee"],

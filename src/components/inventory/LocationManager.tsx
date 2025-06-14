@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Package, Edit } from 'lucide-react';
 import LocationExportActions from './LocationExportActions';
+import PermissionGuard from '@/components/rbac/PermissionGuard';
 
 const LocationManager = () => {
   const [selectedLocation, setSelectedLocation] = useState('main-warehouse');
@@ -56,10 +57,12 @@ const LocationManager = () => {
             <Package className="w-5 h-5" />
             <span>Location Management</span>
           </CardTitle>
-          <Button className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Location
-          </Button>
+          <PermissionGuard permission="manage_locations">
+            <Button className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Location
+            </Button>
+          </PermissionGuard>
         </div>
       </CardHeader>
       <CardContent>
@@ -107,10 +110,12 @@ const LocationManager = () => {
                       <h3 className="text-xl font-semibold text-gray-900">{location.name}</h3>
                       <p className="text-gray-500">{location.address}</p>
                     </div>
-                    <Button variant="outline">
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit Location
-                    </Button>
+                    <PermissionGuard permission="manage_locations">
+                      <Button variant="outline">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Location
+                      </Button>
+                    </PermissionGuard>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -142,7 +147,9 @@ const LocationManager = () => {
                     </Card>
                   </div>
 
-                  <LocationExportActions location={location} />
+                  <PermissionGuard permission="export_data">
+                    <LocationExportActions location={location} />
+                  </PermissionGuard>
                 </div>
               );
             })()}
