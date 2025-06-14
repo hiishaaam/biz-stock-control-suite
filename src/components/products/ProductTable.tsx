@@ -3,25 +3,37 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Archive, AlertTriangle, Trash2 } from 'lucide-react';
-import { useAppData, Product } from '@/contexts/AppDataContext';
+import { useProducts, useSuppliers, useCategories } from '@/hooks/useSupabaseQueries';
+import { useDeleteProduct } from '@/hooks/useProductMutations';
 import EditProductDialog from './EditProductDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
+import type { Product } from '@/types/database';
 
 interface ProductTableProps {
   searchTerm: string;
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
-  const { products, suppliers, categories, deleteProduct } = useAppData();
+  const { data: products = [], isLoading: productsLoading } = useProducts();
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: categories = [] } = useCategories();
+  const deleteProduct = useDeleteProduct();
+  
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<string | null>(null);
 
-  const getSupplierName = (supplierId: string) => {
+  console.log('Products from Supabase:', products);
+  console.log('Suppliers:', suppliers);
+  console.log('Categories:', categories);
+
+  const getSupplierName = (supplierId?: string | null) => {
+    if (!supplierId) return 'No Supplier';
     const supplier = suppliers.find(s => s.id === supplierId);
     return supplier?.name || 'Unknown Supplier';
   };
 
-  const getCategoryName = (categoryId: string) => {
+  const getCategoryName = (categoryId?: string | null) => {
+    if (!categoryId) return 'No Category';
     const category = categories.find(c => c.id === categoryId);
     return category?.name || 'Unknown Category';
   };
@@ -29,13 +41,16 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    getCategoryName(product.category).toLowerCase().includes(searchTerm.toLowerCase())
+    getCategoryName(product.category_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (product: Product) => {
-    if (product.stock === 0) {
+    const stock = product.stock || 0;
+    const threshold = product.low_stock_threshold || 10;
+    
+    if (stock === 0) {
       return <Badge variant="destructive">Out of Stock</Badge>;
-    } else if (product.stock <= product.lowStockThreshold) {
+    } else if (stock <= threshold) {
       return <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">Low Stock</Badge>;
     } else {
       return <Badge className="bg-green-100 text-green-800 hover:bg-green-200">In Stock</Badge>;
@@ -43,9 +58,17 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteProduct(id);
+    await deleteProduct.mutateAsync(id);
     setDeletingProduct(null);
   };
+
+  if (productsLoading) {
+    return <div className="p-4 text-center">Loading products...</div>;
+  }
+
+  if (products.length === 0) {
+    return <div className="p-4 text-center text-gray-500">No products found. Add your first product to get started!</div>;
+  }
 
   return (
     <>
@@ -72,17 +95,17 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{product.name}</p>
-                      <p className="text-sm text-gray-500">{getSupplierName(product.supplier)}</p>
+                      <p className="text-sm text-gray-500">{getSupplierName(product.supplier_id)}</p>
                     </div>
                   </div>
                 </td>
                 <td className="py-4 px-4 text-gray-600 font-mono text-sm">{product.sku}</td>
-                <td className="py-4 px-4 text-gray-600">{getCategoryName(product.category)}</td>
+                <td className="py-4 px-4 text-gray-600">{getCategoryName(product.category_id)}</td>
                 <td className="py-4 px-4 text-gray-900 font-medium">${product.price}</td>
                 <td className="py-4 px-4">
                   <div className="flex items-center space-x-2">
-                    <span className="font-medium text-gray-900">{product.stock}</span>
-                    {product.stock <= product.lowStockThreshold && product.stock > 0 && (
+                    <span className="font-medium text-gray-900">{product.stock || 0}</span>
+                    {(product.stock || 0) <= (product.low_stock_threshold || 10) && (product.stock || 0) > 0 && (
                       <AlertTriangle className="w-4 h-4 text-orange-500" />
                     )}
                   </div>

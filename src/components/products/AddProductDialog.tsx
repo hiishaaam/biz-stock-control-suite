@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSuppliers, useCategories } from '@/hooks/useSupabaseQueries';
+import { useCreateProduct } from '@/hooks/useProductMutations';
 import { Loader2 } from 'lucide-react';
 
 interface AddProductDialogProps {
@@ -26,16 +27,18 @@ interface AddProductDialogProps {
 }
 
 const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange }) => {
-  const { addProduct, suppliers, categories, isLoading } = useAppData();
+  const { data: suppliers = [] } = useSuppliers();
+  const { data: categories = [] } = useCategories();
+  const createProduct = useCreateProduct();
+  
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
-    category: '',
+    category_id: '',
     price: '',
-    cost: '',
     stock: '',
-    lowStockThreshold: '',
-    supplier: '',
+    low_stock_threshold: '',
+    supplier_id: '',
     description: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -49,8 +52,8 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
     if (!formData.sku.trim()) {
       newErrors.sku = 'SKU is required';
     }
-    if (!formData.category) {
-      newErrors.category = 'Category is required';
+    if (!formData.category_id) {
+      newErrors.category_id = 'Category is required';
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
       newErrors.price = 'Valid selling price is required';
@@ -58,8 +61,8 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
     if (!formData.stock || parseInt(formData.stock) < 0) {
       newErrors.stock = 'Valid stock quantity is required';
     }
-    if (formData.lowStockThreshold && parseInt(formData.lowStockThreshold) < 0) {
-      newErrors.lowStockThreshold = 'Low stock threshold must be 0 or greater';
+    if (formData.low_stock_threshold && parseInt(formData.low_stock_threshold) < 0) {
+      newErrors.low_stock_threshold = 'Low stock threshold must be 0 or greater';
     }
 
     setErrors(newErrors);
@@ -69,39 +72,44 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submitted with data:', formData);
+    
     if (!validateForm()) {
+      console.log('Form validation failed:', errors);
       return;
     }
 
     try {
-      await addProduct({
+      const productData = {
         name: formData.name.trim(),
         sku: formData.sku.trim(),
-        category: formData.category,
+        category_id: formData.category_id || null,
+        supplier_id: formData.supplier_id || null,
         price: parseFloat(formData.price),
-        cost: formData.cost ? parseFloat(formData.cost) : undefined,
         stock: parseInt(formData.stock),
-        lowStockThreshold: formData.lowStockThreshold ? parseInt(formData.lowStockThreshold) : 10,
-        supplier: formData.supplier,
-        description: formData.description.trim() || undefined,
-      });
+        low_stock_threshold: formData.low_stock_threshold ? parseInt(formData.low_stock_threshold) : 10,
+        description: formData.description.trim() || null,
+      };
+
+      console.log('Creating product with data:', productData);
+      
+      await createProduct.mutateAsync(productData);
 
       // Reset form and close dialog
       setFormData({
         name: '',
         sku: '',
-        category: '',
+        category_id: '',
         price: '',
-        cost: '',
         stock: '',
-        lowStockThreshold: '',
-        supplier: '',
+        low_stock_threshold: '',
+        supplier_id: '',
         description: '',
       });
       setErrors({});
       onOpenChange(false);
     } catch (error) {
-      // Error is handled in the context
+      console.error('Error creating product:', error);
     }
   };
 
@@ -141,9 +149,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="category">Category *</Label>
-              <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+              <Label htmlFor="category_id">Category *</Label>
+              <Select value={formData.category_id} onValueChange={(value) => setFormData({ ...formData, category_id: value })}>
+                <SelectTrigger className={errors.category_id ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -154,12 +162,12 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                   ))}
                 </SelectContent>
               </Select>
-              {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+              {errors.category_id && <p className="text-sm text-red-500">{errors.category_id}</p>}
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="supplier">Supplier</Label>
-              <Select value={formData.supplier} onValueChange={(value) => setFormData({ ...formData, supplier: value })}>
+              <Label htmlFor="supplier_id">Supplier</Label>
+              <Select value={formData.supplier_id} onValueChange={(value) => setFormData({ ...formData, supplier_id: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select supplier" />
                 </SelectTrigger>
@@ -190,20 +198,6 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="cost">Cost Price</Label>
-              <Input
-                id="cost"
-                type="number"
-                step="0.01"
-                value={formData.cost}
-                onChange={(e) => setFormData({ ...formData, cost: e.target.value })}
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
               <Label htmlFor="stock">Initial Stock *</Label>
               <Input
                 id="stock"
@@ -215,19 +209,19 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
               />
               {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="lowStockThreshold">Low Stock Alert</Label>
-              <Input
-                id="lowStockThreshold"
-                type="number"
-                value={formData.lowStockThreshold}
-                onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
-                placeholder="10"
-                className={errors.lowStockThreshold ? 'border-red-500' : ''}
-              />
-              {errors.lowStockThreshold && <p className="text-sm text-red-500">{errors.lowStockThreshold}</p>}
-            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="low_stock_threshold">Low Stock Alert</Label>
+            <Input
+              id="low_stock_threshold"
+              type="number"
+              value={formData.low_stock_threshold}
+              onChange={(e) => setFormData({ ...formData, low_stock_threshold: e.target.value })}
+              placeholder="10"
+              className={errors.low_stock_threshold ? 'border-red-500' : ''}
+            />
+            {errors.low_stock_threshold && <p className="text-sm text-red-500">{errors.low_stock_threshold}</p>}
           </div>
 
           <div className="space-y-2">
@@ -242,11 +236,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={createProduct.isPending}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
-              {isLoading ? (
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={createProduct.isPending}>
+              {createProduct.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Adding Product...

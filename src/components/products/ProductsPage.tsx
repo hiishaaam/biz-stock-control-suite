@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, Filter, Package } from 'lucide-react';
+import { useProducts } from '@/hooks/useSupabaseQueries';
 import ProductTable from './ProductTable';
 import AddProductDialog from './AddProductDialog';
 import ExportButton from '../shared/ExportButton';
@@ -11,13 +12,19 @@ import ExportButton from '../shared/ExportButton';
 const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const { data: products = [], isLoading } = useProducts();
+
+  console.log('ProductsPage - Products count:', products.length);
+  console.log('ProductsPage - Is loading:', isLoading);
 
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Products</h1>
-          <p className="text-gray-500 mt-1 text-sm sm:text-base">Manage your product catalog and inventory levels.</p>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">
+            Manage your product catalog and inventory levels. ({products.length} products)
+          </p>
         </div>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <ExportButton type="products" className="w-full sm:w-auto" />
