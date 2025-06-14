@@ -52,10 +52,10 @@ const EditUserDialog: React.FC<EditUserDialogProps> = ({ userId, open, onOpenCha
       await updateUser(userId, {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        role: formData.role,
+        role: formData.role as 'admin' | 'manager' | 'employee',
         department: formData.department.trim() || undefined,
         phone: formData.phone.trim() || undefined,
-        status: formData.status,
+        status: formData.status as 'active' | 'inactive',
       });
 
       onOpenChange(false);
