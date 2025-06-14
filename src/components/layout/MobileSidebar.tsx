@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Package, Database, Archive, User, BarChart3, Settings, Home, X, Menu } from 'lucide-react';
+import { Package, Database, Archive, User, Users, BarChart3, Settings, Home, X, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const MobileSidebar = () => {
@@ -14,6 +14,7 @@ const MobileSidebar = () => {
     { icon: Archive, label: 'Categories', path: '/dashboard/categories' },
     { icon: Database, label: 'Inventory', path: '/dashboard/inventory' },
     { icon: User, label: 'Suppliers', path: '/dashboard/suppliers' },
+    { icon: Users, label: 'Users', path: '/dashboard/users' },
     { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];

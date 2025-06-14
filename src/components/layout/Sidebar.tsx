@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Package, Database, Archive, User, BarChart3, Settings, Home } from 'lucide-react';
+import { Package, Database, Archive, User, Users, BarChart3, Settings, Home } from 'lucide-react';
 
 const Sidebar = () => {
   const location = useLocation();
@@ -12,6 +12,7 @@ const Sidebar = () => {
     { icon: Archive, label: 'Categories', path: '/dashboard/categories' },
     { icon: Database, label: 'Inventory', path: '/dashboard/inventory' },
     { icon: User, label: 'Suppliers', path: '/dashboard/suppliers' },
+    { icon: Users, label: 'Users', path: '/dashboard/users' },
     { icon: BarChart3, label: 'Reports', path: '/dashboard/reports' },
     { icon: Settings, label: 'Settings', path: '/dashboard/settings' },
   ];
