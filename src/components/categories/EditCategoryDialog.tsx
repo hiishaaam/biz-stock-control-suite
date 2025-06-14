@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,19 +13,31 @@ import { Textarea } from '@/components/ui/textarea';
 import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import { Loader2 } from 'lucide-react';
 
-interface AddCategoryDialogProps {
+interface EditCategoryDialogProps {
+  categoryId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChange }) => {
-  const { addCategory } = useSupabaseAppData();
+const EditCategoryDialog: React.FC<EditCategoryDialogProps> = ({ categoryId, open, onOpenChange }) => {
+  const { categories, updateCategory } = useSupabaseAppData();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const category = categories.find(c => c.id === categoryId);
+
+  useEffect(() => {
+    if (category) {
+      setFormData({
+        name: category.name,
+        description: category.description || '',
+      });
+    }
+  }, [category]);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -47,14 +59,11 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
 
     setIsLoading(true);
     try {
-      await addCategory({
+      await updateCategory(categoryId, {
         name: formData.name.trim(),
         description: formData.description.trim() || undefined,
       });
 
-      // Reset form and close dialog
-      setFormData({ name: '', description: '' });
-      setErrors({});
       onOpenChange(false);
     } catch (error) {
       // Error is handled in the context
@@ -63,11 +72,13 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
     }
   };
 
+  if (!category) return null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Category</DialogTitle>
+          <DialogTitle>Edit Category</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -102,10 +113,10 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Adding Category...
+                  Updating Category...
                 </>
               ) : (
-                'Add Category'
+                'Update Category'
               )}
             </Button>
           </div>
@@ -115,4 +126,4 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
   );
 };
 
-export default AddCategoryDialog;
+export default EditCategoryDialog;
