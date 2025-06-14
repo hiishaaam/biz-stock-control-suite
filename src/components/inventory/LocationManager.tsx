@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Package, Edit } from 'lucide-react';
+import LocationExportActions from './LocationExportActions';
 
 const LocationManager = () => {
   const [selectedLocation, setSelectedLocation] = useState('main-warehouse');
@@ -141,15 +142,7 @@ const LocationManager = () => {
                     </Card>
                   </div>
 
-                  <div className="space-y-3">
-                    <h4 className="font-medium text-gray-900">Quick Actions</h4>
-                    <div className="flex flex-wrap gap-2">
-                      <Button variant="outline" size="sm">Transfer Stock</Button>
-                      <Button variant="outline" size="sm">Stock Count</Button>
-                      <Button variant="outline" size="sm">Generate Report</Button>
-                      <Button variant="outline" size="sm">View History</Button>
-                    </div>
-                  </div>
+                  <LocationExportActions location={location} />
                 </div>
               );
             })()}
