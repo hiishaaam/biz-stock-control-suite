@@ -10,15 +10,15 @@ const SuppliersPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Suppliers</h1>
-          <p className="text-gray-500 mt-1">Manage your supplier relationships and contacts.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Suppliers</h1>
+          <p className="text-gray-500 mt-1 text-sm sm:text-base">Manage your supplier relationships and contacts.</p>
         </div>
         <Button 
           onClick={() => setIsAddDialogOpen(true)}
-          className="bg-blue-600 hover:bg-blue-700"
+          className="bg-blue-600 hover:bg-blue-700 w-full sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Supplier
@@ -26,13 +26,13 @@ const SuppliersPage = () => {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center space-x-2 text-lg sm:text-xl">
             <User className="w-5 h-5" />
             <span>Supplier Directory</span>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-0 sm:px-6">
           <SupplierTable />
         </CardContent>
       </Card>

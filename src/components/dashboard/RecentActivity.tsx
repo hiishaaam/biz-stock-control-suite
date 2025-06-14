@@ -37,21 +37,21 @@ const RecentActivity = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+      <CardHeader className="pb-2 sm:pb-6">
+        <CardTitle className="text-lg sm:text-xl">Recent Activity</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4 max-h-64 sm:max-h-80 overflow-y-auto">
           {activities.map((activity, index) => {
             const Icon = activity.icon;
             return (
-              <div key={index} className="flex items-start space-x-4 p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className={`p-2 rounded-full ${activity.color}`}>
+              <div key={index} className="flex items-start space-x-3 sm:space-x-4 p-3 sm:p-4 border border-gray-100 rounded-lg hover:bg-gray-50 transition-colors">
+                <div className={`p-2 rounded-full flex-shrink-0 ${activity.color}`}>
                   <Icon className="w-4 h-4" />
                 </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gray-900">{activity.description}</p>
-                  <p className="text-sm text-gray-500 mt-1">{activity.time}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-gray-900 text-sm sm:text-base break-words">{activity.description}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 mt-1">{activity.time}</p>
                 </div>
               </div>
             );

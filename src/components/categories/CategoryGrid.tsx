@@ -57,38 +57,38 @@ const CategoryGrid = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
       {categories.map((category) => {
         const Icon = category.icon;
         return (
           <div
             key={category.id}
-            className="p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white"
+            className="p-4 sm:p-6 border border-gray-200 rounded-lg hover:shadow-md transition-shadow bg-white"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center space-x-3">
-                <div className={`p-2 rounded-lg ${category.color.replace('text-', 'bg-').replace('-800', '-100')}`}>
-                  <Icon className={`w-5 h-5 ${category.color}`} />
+            <div className="flex items-start justify-between mb-3 sm:mb-4">
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+                <div className={`p-1.5 sm:p-2 rounded-lg ${category.color.replace('text-', 'bg-').replace('-800', '-100')} flex-shrink-0`}>
+                  <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${category.color}`} />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900">{category.name}</h3>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 truncate">{category.name}</h3>
               </div>
-              <div className="flex items-center space-x-1">
-                <Button variant="ghost" size="sm">
-                  <Edit className="w-4 h-4" />
+              <div className="flex items-center space-x-1 flex-shrink-0 ml-2">
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
-                <Button variant="ghost" size="sm">
-                  <Archive className="w-4 h-4" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Archive className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               </div>
             </div>
             
-            <p className="text-gray-600 text-sm mb-4">{category.description}</p>
+            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4 line-clamp-2">{category.description}</p>
             
             <div className="flex items-center justify-between">
-              <Badge className={category.color}>
+              <Badge className={`${category.color} text-xs`}>
                 {category.productCount} Products
               </Badge>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" className="text-xs sm:text-sm">
                 View Products
               </Button>
             </div>
