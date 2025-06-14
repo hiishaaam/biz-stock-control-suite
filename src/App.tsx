@@ -11,6 +11,7 @@ import CategoriesPage from "./components/categories/CategoriesPage";
 import InventoryPage from "./components/inventory/InventoryPage";
 import SuppliersPage from "./components/suppliers/SuppliersPage";
 import ReportsPage from "./components/reports/ReportsPage";
+import LandingPage from "./components/landing/LandingPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,7 +23,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/dashboard" element={<Layout />}>
             <Route index element={<Dashboard />} />
             <Route path="products" element={<ProductsPage />} />
             <Route path="categories" element={<CategoriesPage />} />
