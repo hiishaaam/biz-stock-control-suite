@@ -8,7 +8,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Download, FileText, Table } from 'lucide-react';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
+import { generateInventoryReport, generateCSVReport } from '@/utils/reportGenerator';
+import { useToast } from '@/hooks/use-toast';
 
 interface ExportButtonProps {
   type: 'products' | 'suppliers' | 'categories' | 'orders';
@@ -16,15 +18,68 @@ interface ExportButtonProps {
 }
 
 const ExportButton: React.FC<ExportButtonProps> = ({ type, className = '' }) => {
-  const { exportData } = useAppData();
+  const { products, suppliers, categories, orders } = useSupabaseAppData();
+  const { toast } = useToast();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (format: 'csv' | 'pdf') => {
     setIsExporting(true);
+    
     try {
-      await exportData(type, format);
+      let filename = '';
+      
+      if (format === 'pdf') {
+        // For PDF, we'll use the inventory report generator as a base
+        // and adapt it for different data types
+        let data = [];
+        switch (type) {
+          case 'products':
+            data = products;
+            break;
+          case 'suppliers':
+            data = suppliers;
+            break;
+          case 'categories':
+            data = categories;
+            break;
+          case 'orders':
+            data = orders;
+            break;
+        }
+        
+        const doc = generateInventoryReport(data);
+        filename = `${type}_export_${new Date().toISOString().split('T')[0]}.pdf`;
+        doc.save(filename);
+      } else {
+        // CSV format
+        const csvContent = generateCSVReport(type, []);
+        filename = `${type}_export_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
+      toast({
+        title: "Export Successful",
+        description: `${type.charAt(0).toUpperCase() + type.slice(1)} exported successfully as ${format.toUpperCase()}!`,
+      });
+      
+      console.log(`Generated ${format.toUpperCase()} export: ${filename}`);
+      
     } catch (error) {
       console.error('Export failed:', error);
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsExporting(false);
     }
