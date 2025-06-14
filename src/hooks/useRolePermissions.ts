@@ -96,6 +96,7 @@ export const useAssignRole = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userRoles'] });
+      queryClient.invalidateQueries({ queryKey: ['allUserRoles'] });
       toast.success('Role assigned successfully!');
     },
     onError: (error: any) => {
@@ -120,6 +121,7 @@ export const useRemoveRole = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userRoles'] });
+      queryClient.invalidateQueries({ queryKey: ['allUserRoles'] });
       toast.success('Role removed successfully!');
     },
     onError: (error: any) => {
@@ -133,16 +135,33 @@ export const useAllUserRoles = () => {
   return useQuery({
     queryKey: ['allUserRoles'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get all user roles
+      const { data: userRoles, error: rolesError } = await supabase
         .from('user_roles')
-        .select(`
-          *,
-          profiles!inner(full_name, email)
-        `)
+        .select('*')
         .order('assigned_at', { ascending: false });
       
-      if (error) throw error;
-      return data;
+      if (rolesError) throw rolesError;
+      if (!userRoles || userRoles.length === 0) return [];
+
+      // Get all unique user IDs
+      const userIds = [...new Set(userRoles.map(role => role.user_id))];
+      
+      // Get profiles for all users
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('id, full_name, email')
+        .in('id', userIds);
+      
+      if (profilesError) throw profilesError;
+
+      // Combine the data
+      const result = userRoles.map(userRole => ({
+        ...userRole,
+        profiles: profiles?.find(profile => profile.id === userRole.user_id) || null
+      }));
+
+      return result;
     },
   });
 };
