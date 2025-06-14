@@ -2,8 +2,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Database } from '@/integrations/supabase/types';
 
-// Types matching our database schema
+// Types matching our database schema - using Supabase generated types
 export interface Category {
   id: string;
   name: string;
@@ -88,7 +89,7 @@ export interface OrderItem {
 
 export interface Activity {
   id: string;
-  type: string;
+  type: Database['public']['Enums']['activity_type'];
   description: string;
   user_id?: string;
   timestamp?: string;
@@ -422,7 +423,7 @@ export const useCreateActivity = () => {
     mutationFn: async (activity: Omit<Activity, 'id' | 'timestamp'>) => {
       const { data, error } = await supabase
         .from('activities')
-        .insert([activity])
+        .insert(activity)
         .select()
         .single();
       
