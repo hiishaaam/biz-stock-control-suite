@@ -137,7 +137,7 @@ export const useAllUserRoles = () => {
         .from('user_roles')
         .select(`
           *,
-          profiles!user_roles_user_id_fkey(full_name, email)
+          profiles!inner(full_name, email)
         `)
         .order('assigned_at', { ascending: false });
       
