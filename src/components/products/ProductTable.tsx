@@ -3,66 +3,32 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Archive, AlertTriangle } from 'lucide-react';
+import { useAppData, Product } from '@/contexts/AppDataContext';
 
 interface ProductTableProps {
   searchTerm: string;
 }
 
 const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
-  const products = [
-    {
-      id: 1,
-      name: 'iPhone 15 Pro',
-      sku: 'IPH15P-256-TB',
-      category: 'Electronics',
-      price: 999.99,
-      stock: 45,
-      lowStockThreshold: 10,
-      supplier: 'Apple Inc.',
-      status: 'active',
-    },
-    {
-      id: 2,
-      name: 'Nike Air Max 90',
-      sku: 'NAM90-BLK-42',
-      category: 'Footwear',
-      price: 129.99,
-      stock: 3,
-      lowStockThreshold: 5,
-      supplier: 'Nike Sports',
-      status: 'low_stock',
-    },
-    {
-      id: 3,
-      name: 'MacBook Pro 16"',
-      sku: 'MBP16-512-SG',
-      category: 'Electronics',
-      price: 2499.99,
-      stock: 12,
-      lowStockThreshold: 8,
-      supplier: 'Apple Inc.',
-      status: 'active',
-    },
-    {
-      id: 4,
-      name: 'Coffee Beans Premium',
-      sku: 'CFB-PREM-1KG',
-      category: 'Food & Beverage',
-      price: 24.99,
-      stock: 0,
-      lowStockThreshold: 20,
-      supplier: 'Coffee Corp',
-      status: 'out_of_stock',
-    },
-  ];
+  const { products, suppliers, categories } = useAppData();
+
+  const getSupplierName = (supplierId: string) => {
+    const supplier = suppliers.find(s => s.id === supplierId);
+    return supplier?.name || 'Unknown Supplier';
+  };
+
+  const getCategoryName = (categoryId: string) => {
+    const category = categories.find(c => c.id === categoryId);
+    return category?.name || 'Unknown Category';
+  };
 
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchTerm.toLowerCase())
+    getCategoryName(product.category).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getStatusBadge = (product: any) => {
+  const getStatusBadge = (product: Product) => {
     if (product.stock === 0) {
       return <Badge variant="destructive">Out of Stock</Badge>;
     } else if (product.stock <= product.lowStockThreshold) {
@@ -96,12 +62,12 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-500">{product.supplier}</p>
+                    <p className="text-sm text-gray-500">{getSupplierName(product.supplier)}</p>
                   </div>
                 </div>
               </td>
               <td className="py-4 px-4 text-gray-600 font-mono text-sm">{product.sku}</td>
-              <td className="py-4 px-4 text-gray-600">{product.category}</td>
+              <td className="py-4 px-4 text-gray-600">{getCategoryName(product.category)}</td>
               <td className="py-4 px-4 text-gray-900 font-medium">${product.price}</td>
               <td className="py-4 px-4">
                 <div className="flex items-center space-x-2">

@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAppData } from '@/contexts/AppDataContext';
+import { Loader2 } from 'lucide-react';
 
 interface AddProductDialogProps {
   open: boolean;
@@ -24,6 +26,7 @@ interface AddProductDialogProps {
 }
 
 const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange }) => {
+  const { addProduct, suppliers, categories, isLoading } = useAppData();
   const [formData, setFormData] = useState({
     name: '',
     sku: '',
@@ -35,23 +38,71 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
     supplier: '',
     description: '',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.name.trim()) {
+      newErrors.name = 'Product name is required';
+    }
+    if (!formData.sku.trim()) {
+      newErrors.sku = 'SKU is required';
+    }
+    if (!formData.category) {
+      newErrors.category = 'Category is required';
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      newErrors.price = 'Valid selling price is required';
+    }
+    if (!formData.stock || parseInt(formData.stock) < 0) {
+      newErrors.stock = 'Valid stock quantity is required';
+    }
+    if (formData.lowStockThreshold && parseInt(formData.lowStockThreshold) < 0) {
+      newErrors.lowStockThreshold = 'Low stock threshold must be 0 or greater';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Adding product:', formData);
-    onOpenChange(false);
-    // Reset form
-    setFormData({
-      name: '',
-      sku: '',
-      category: '',
-      price: '',
-      cost: '',
-      stock: '',
-      lowStockThreshold: '',
-      supplier: '',
-      description: '',
-    });
+    
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      await addProduct({
+        name: formData.name.trim(),
+        sku: formData.sku.trim(),
+        category: formData.category,
+        price: parseFloat(formData.price),
+        cost: formData.cost ? parseFloat(formData.cost) : undefined,
+        stock: parseInt(formData.stock),
+        lowStockThreshold: formData.lowStockThreshold ? parseInt(formData.lowStockThreshold) : 10,
+        supplier: formData.supplier,
+        description: formData.description.trim() || undefined,
+      });
+
+      // Reset form and close dialog
+      setFormData({
+        name: '',
+        sku: '',
+        category: '',
+        price: '',
+        cost: '',
+        stock: '',
+        lowStockThreshold: '',
+        supplier: '',
+        description: '',
+      });
+      setErrors({});
+      onOpenChange(false);
+    } catch (error) {
+      // Error is handled in the context
+    }
   };
 
   return (
@@ -70,8 +121,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Enter product name"
-                required
+                className={errors.name ? 'border-red-500' : ''}
               />
+              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
             </div>
             
             <div className="space-y-2">
@@ -81,8 +133,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                 value={formData.sku}
                 onChange={(e) => setFormData({ ...formData, sku: e.target.value })}
                 placeholder="Enter SKU"
-                required
+                className={errors.sku ? 'border-red-500' : ''}
               />
+              {errors.sku && <p className="text-sm text-red-500">{errors.sku}</p>}
             </div>
           </div>
 
@@ -90,18 +143,18 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
-                <SelectTrigger>
+                <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="electronics">Electronics</SelectItem>
-                  <SelectItem value="clothing">Clothing</SelectItem>
-                  <SelectItem value="books">Books</SelectItem>
-                  <SelectItem value="home-garden">Home & Garden</SelectItem>
-                  <SelectItem value="sports">Sports</SelectItem>
-                  <SelectItem value="food-beverage">Food & Beverage</SelectItem>
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
             </div>
             
             <div className="space-y-2">
@@ -111,10 +164,11 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                   <SelectValue placeholder="Select supplier" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="apple">Apple Inc.</SelectItem>
-                  <SelectItem value="nike">Nike Sports</SelectItem>
-                  <SelectItem value="samsung">Samsung</SelectItem>
-                  <SelectItem value="coffee-corp">Coffee Corp</SelectItem>
+                  {suppliers.map((supplier) => (
+                    <SelectItem key={supplier.id} value={supplier.id}>
+                      {supplier.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -130,8 +184,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                 value={formData.price}
                 onChange={(e) => setFormData({ ...formData, price: e.target.value })}
                 placeholder="0.00"
-                required
+                className={errors.price ? 'border-red-500' : ''}
               />
+              {errors.price && <p className="text-sm text-red-500">{errors.price}</p>}
             </div>
             
             <div className="space-y-2">
@@ -156,8 +211,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                 value={formData.stock}
                 onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
                 placeholder="0"
-                required
+                className={errors.stock ? 'border-red-500' : ''}
               />
+              {errors.stock && <p className="text-sm text-red-500">{errors.stock}</p>}
             </div>
             
             <div className="space-y-2">
@@ -168,7 +224,9 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
                 value={formData.lowStockThreshold}
                 onChange={(e) => setFormData({ ...formData, lowStockThreshold: e.target.value })}
                 placeholder="10"
+                className={errors.lowStockThreshold ? 'border-red-500' : ''}
               />
+              {errors.lowStockThreshold && <p className="text-sm text-red-500">{errors.lowStockThreshold}</p>}
             </div>
           </div>
 
@@ -184,11 +242,18 @@ const AddProductDialog: React.FC<AddProductDialogProps> = ({ open, onOpenChange 
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">
-              Add Product
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Adding Product...
+                </>
+              ) : (
+                'Add Product'
+              )}
             </Button>
           </div>
         </form>

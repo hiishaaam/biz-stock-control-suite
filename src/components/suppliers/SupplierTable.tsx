@@ -3,54 +3,10 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Mail, User } from 'lucide-react';
+import { useAppData } from '@/contexts/AppDataContext';
 
 const SupplierTable = () => {
-  const suppliers = [
-    {
-      id: 1,
-      name: 'Apple Inc.',
-      contact: 'John Smith',
-      email: 'orders@apple.com',
-      phone: '+1-800-275-2273',
-      address: 'One Apple Park Way, Cupertino, CA',
-      products: 23,
-      totalOrders: 156,
-      status: 'active',
-    },
-    {
-      id: 2,
-      name: 'Nike Sports',
-      contact: 'Sarah Johnson',
-      email: 'supply@nike.com',
-      phone: '+1-503-671-6453',
-      address: 'One Bowerman Drive, Beaverton, OR',
-      products: 45,
-      totalOrders: 89,
-      status: 'active',
-    },
-    {
-      id: 3,
-      name: 'Samsung Electronics',
-      contact: 'Kim Lee',
-      email: 'b2b@samsung.com',
-      phone: '+82-2-2255-0114',
-      address: 'Seoul, South Korea',
-      products: 67,
-      totalOrders: 234,
-      status: 'active',
-    },
-    {
-      id: 4,
-      name: 'Coffee Corp',
-      contact: 'Maria Garcia',
-      email: 'wholesale@coffeecorp.com',
-      phone: '+1-555-123-4567',
-      address: 'Portland, OR',
-      products: 12,
-      totalOrders: 45,
-      status: 'inactive',
-    },
-  ];
+  const { suppliers } = useAppData();
 
   return (
     <div className="overflow-x-auto">
@@ -75,7 +31,7 @@ const SupplierTable = () => {
                   </div>
                   <div>
                     <p className="font-medium text-gray-900">{supplier.name}</p>
-                    <p className="text-sm text-gray-500">{supplier.contact}</p>
+                    {supplier.contact && <p className="text-sm text-gray-500">{supplier.contact}</p>}
                   </div>
                 </div>
               </td>
@@ -85,8 +41,8 @@ const SupplierTable = () => {
                     <Mail className="w-4 h-4 text-gray-400" />
                     <span className="text-sm text-gray-600">{supplier.email}</span>
                   </div>
-                  <p className="text-sm text-gray-600">{supplier.phone}</p>
-                  <p className="text-sm text-gray-500">{supplier.address}</p>
+                  {supplier.phone && <p className="text-sm text-gray-600">{supplier.phone}</p>}
+                  {supplier.address && <p className="text-sm text-gray-500">{supplier.address}</p>}
                 </div>
               </td>
               <td className="py-4 px-4 text-gray-900 font-medium">{supplier.products}</td>
