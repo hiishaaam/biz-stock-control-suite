@@ -28,6 +28,7 @@ export interface Product {
   id: string;
   name: string;
   sku: string;
+  code?: string | null;
   category_id?: string;
   supplier_id?: string;
   price: number;
