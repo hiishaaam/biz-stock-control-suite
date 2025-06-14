@@ -26,27 +26,44 @@ export const generateInventoryReport = (data: any[]) => {
   yPosition += 20;
   doc.setFontSize(10);
   
-  // Sample inventory data
-  const inventoryData = [
-    { name: 'iPhone 15 Pro', category: 'Electronics', stock: 45, value: '$44,955' },
-    { name: 'Nike Air Max 90', category: 'Footwear', stock: 23, value: '$2,990' },
-    { name: 'MacBook Pro 16"', category: 'Electronics', stock: 12, value: '$29,988' },
-    { name: 'Coffee Beans Premium', category: 'Food & Beverage', stock: 156, value: '$3,900' }
-  ];
-  
-  inventoryData.forEach((item, index) => {
-    doc.text(`${item.name} (${item.category})`, 20, yPosition);
-    doc.text(`Stock: ${item.stock} | Value: ${item.value}`, 20, yPosition + 8);
-    yPosition += 20;
-  });
-  
-  // Summary
-  yPosition += 10;
-  doc.setFontSize(12);
-  doc.text('Summary:', 20, yPosition);
-  doc.setFontSize(10);
-  doc.text('Total Items: 236', 20, yPosition + 15);
-  doc.text('Total Value: $81,833', 20, yPosition + 25);
+  // Use actual data instead of hardcoded sample data
+  if (data && data.length > 0) {
+    let totalValue = 0;
+    
+    data.forEach((item, index) => {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      const name = item.name || 'Unknown Product';
+      const stock = item.stock || 0;
+      const price = item.price || 0;
+      const itemValue = stock * price;
+      totalValue += itemValue;
+      
+      doc.text(`${name}`, 20, yPosition);
+      doc.text(`SKU: ${item.sku || 'N/A'} | Stock: ${stock} | Price: $${price.toFixed(2)}`, 20, yPosition + 8);
+      doc.text(`Total Value: $${itemValue.toFixed(2)}`, 20, yPosition + 16);
+      yPosition += 28;
+    });
+    
+    // Summary
+    yPosition += 10;
+    if (yPosition > 250) {
+      doc.addPage();
+      yPosition = 30;
+    }
+    
+    doc.setFontSize(12);
+    doc.text('Summary:', 20, yPosition);
+    doc.setFontSize(10);
+    doc.text(`Total Items: ${data.length}`, 20, yPosition + 15);
+    doc.text(`Total Inventory Value: $${totalValue.toFixed(2)}`, 20, yPosition + 25);
+  } else {
+    doc.text('No inventory data available', 20, yPosition);
+  }
   
   return doc;
 };
