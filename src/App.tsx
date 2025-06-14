@@ -11,6 +11,8 @@ import ProductsPage from "./components/products/ProductsPage";
 import CategoriesPage from "./components/categories/CategoriesPage";
 import InventoryPage from "./components/inventory/InventoryPage";
 import SuppliersPage from "./components/suppliers/SuppliersPage";
+import UsersPage from "./components/users/UsersPage";
+import OrdersPage from "./components/orders/OrdersPage";
 import ReportsPage from "./components/reports/ReportsPage";
 import LandingPage from "./components/landing/LandingPage";
 import NotFound from "./pages/NotFound";
@@ -32,6 +34,8 @@ const App = () => (
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="inventory" element={<InventoryPage />} />
               <Route path="suppliers" element={<SuppliersPage />} />
+              <Route path="users" element={<UsersPage />} />
+              <Route path="orders" element={<OrdersPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<Dashboard />} />
             </Route>
