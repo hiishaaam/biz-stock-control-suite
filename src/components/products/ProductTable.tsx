@@ -2,11 +2,12 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Archive, AlertTriangle, Trash2 } from 'lucide-react';
+import { Edit, Archive, AlertTriangle, Trash2, QrCode } from 'lucide-react';
 import { useProducts, useSuppliers, useCategories } from '@/hooks/useSupabaseQueries';
 import { useDeleteProduct } from '@/hooks/useProductMutations';
 import EditProductDialog from './EditProductDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
+import CodeDisplayDialog from '../barcode/CodeDisplayDialog';
 import type { Product } from '@/types/database';
 
 interface ProductTableProps {
@@ -21,6 +22,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
   
   const [editingProduct, setEditingProduct] = useState<string | null>(null);
   const [deletingProduct, setDeletingProduct] = useState<string | null>(null);
+  const [codeDisplayProduct, setCodeDisplayProduct] = useState<Product | null>(null);
 
   console.log('Products from Supabase:', products);
   console.log('Suppliers:', suppliers);
@@ -41,6 +43,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (product.code && product.code.toLowerCase().includes(searchTerm.toLowerCase())) ||
     getCategoryName(product.category_id).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -62,6 +65,10 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
     setDeletingProduct(null);
   };
 
+  const handleShowCode = (product: Product) => {
+    setCodeDisplayProduct(product);
+  };
+
   if (productsLoading) {
     return <div className="p-4 text-center">Loading products...</div>;
   }
@@ -77,7 +84,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
           <thead>
             <tr className="border-b border-gray-200">
               <th className="text-left py-3 px-4 font-medium text-gray-900">Product</th>
-              <th className="text-left py-3 px-4 font-medium text-gray-900">SKU</th>
+              <th className="text-left py-3 px-4 font-medium text-gray-900">SKU / Code</th>
               <th className="text-left py-3 px-4 font-medium text-gray-900">Category</th>
               <th className="text-left py-3 px-4 font-medium text-gray-900">Price</th>
               <th className="text-left py-3 px-4 font-medium text-gray-900">Stock</th>
@@ -99,7 +106,16 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
                     </div>
                   </div>
                 </td>
-                <td className="py-4 px-4 text-gray-600 font-mono text-sm">{product.sku}</td>
+                <td className="py-4 px-4">
+                  <div className="space-y-1">
+                    <p className="text-gray-600 font-mono text-sm">{product.sku}</p>
+                    {product.code && (
+                      <p className="text-xs text-blue-600 font-mono bg-blue-50 px-2 py-1 rounded">
+                        {product.code}
+                      </p>
+                    )}
+                  </div>
+                </td>
                 <td className="py-4 px-4 text-gray-600">{getCategoryName(product.category_id)}</td>
                 <td className="py-4 px-4 text-gray-900 font-medium">${product.price}</td>
                 <td className="py-4 px-4">
@@ -113,6 +129,14 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
                 <td className="py-4 px-4">{getStatusBadge(product)}</td>
                 <td className="py-4 px-4">
                   <div className="flex items-center space-x-2">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleShowCode(product)}
+                      title="Show Barcode/QR Code"
+                    >
+                      <QrCode className="w-4 h-4" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -151,6 +175,15 @@ const ProductTable: React.FC<ProductTableProps> = ({ searchTerm }) => {
           onConfirm={() => handleDelete(deletingProduct)}
           title="Delete Product"
           description="Are you sure you want to delete this product? This action cannot be undone."
+        />
+      )}
+
+      {codeDisplayProduct && (
+        <CodeDisplayDialog
+          open={!!codeDisplayProduct}
+          onOpenChange={() => setCodeDisplayProduct(null)}
+          productCode={codeDisplayProduct.code || codeDisplayProduct.sku}
+          productName={codeDisplayProduct.name}
         />
       )}
     </>

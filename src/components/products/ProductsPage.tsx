@@ -3,19 +3,32 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Filter, Package } from 'lucide-react';
+import { Plus, Search, Filter, Package, Scan } from 'lucide-react';
 import { useProducts } from '@/hooks/useSupabaseQueries';
 import ProductTable from './ProductTable';
 import AddProductDialog from './AddProductDialog';
+import CodeScannerDialog from '../barcode/CodeScannerDialog';
 import ExportButton from '../shared/ExportButton';
+import { toast } from 'sonner';
 
 const ProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
   const { data: products = [], isLoading } = useProducts();
 
   console.log('ProductsPage - Products count:', products.length);
   console.log('ProductsPage - Is loading:', isLoading);
+
+  const handleCodeScanned = (code: string, product?: any) => {
+    if (product) {
+      setSearchTerm(product.name);
+      toast.success(`Product found: ${product.name}`);
+    } else {
+      setSearchTerm(code);
+      toast.info(`Searching for code: ${code}`);
+    }
+  };
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -27,6 +40,14 @@ const ProductsPage = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <Button 
+            onClick={() => setIsScannerOpen(true)}
+            variant="outline"
+            className="w-full sm:w-auto"
+          >
+            <Scan className="w-4 h-4 mr-2" />
+            Scan Code
+          </Button>
           <ExportButton type="products" className="w-full sm:w-auto" />
           <Button 
             onClick={() => setIsAddDialogOpen(true)}
@@ -50,7 +71,7 @@ const ProductsPage = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   type="text"
-                  placeholder="Search products..."
+                  placeholder="Search products, codes, SKUs..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 w-full sm:w-64"
@@ -71,6 +92,12 @@ const ProductsPage = () => {
       <AddProductDialog 
         open={isAddDialogOpen} 
         onOpenChange={setIsAddDialogOpen} 
+      />
+
+      <CodeScannerDialog
+        open={isScannerOpen}
+        onOpenChange={setIsScannerOpen}
+        onCodeScanned={handleCodeScanned}
       />
     </div>
   );
