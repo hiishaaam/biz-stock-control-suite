@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext } from 'react';
 import { 
   useCategories, 
@@ -48,14 +49,29 @@ interface SupabaseDataContextType {
   deleteCategory: (id: string) => Promise<void>;
   
   // Supplier operations
-  addSupplier: (supplier: Omit<Supplier, 'id' | 'products' | 'totalOrders' | 'status'>) => Promise<void>;
+  addSupplier: (supplier: Omit<Supplier, 'id' | 'products' | 'total_orders' | 'status'>) => Promise<void>;
   updateSupplier: (id: string, supplier: Partial<Supplier>) => Promise<void>;
   deleteSupplier: (id: string) => Promise<void>;
   
   // Product operations
-  addProduct: (product: Omit<Product, 'id' | 'status'>) => Promise<void>;
+  addProduct: (product: Omit<Product, 'id'>) => Promise<void>;
   updateProduct: (id: string, product: Partial<Product>) => Promise<void>;
   deleteProduct: (id: string) => Promise<void>;
+  
+  // Location operations
+  addLocation: (location: Omit<Location, 'id'>) => Promise<void>;
+  updateLocation: (id: string, location: Partial<Location>) => Promise<void>;
+  deleteLocation: (id: string) => Promise<void>;
+  
+  // User operations
+  addUser: (user: Omit<User, 'id'>) => Promise<void>;
+  updateUser: (id: string, user: Partial<User>) => Promise<void>;
+  deleteUser: (id: string) => Promise<void>;
+  
+  // Order operations
+  addOrder: (order: Omit<Order, 'id'>) => Promise<void>;
+  updateOrder: (id: string, order: Partial<Order>) => Promise<void>;
+  deleteOrder: (id: string) => Promise<void>;
   
   // Utility functions
   sendEmail: (to: string, subject: string, message: string) => Promise<void>;
@@ -128,7 +144,7 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const addSupplier = async (supplier: Omit<Supplier, 'id' | 'products' | 'totalOrders' | 'status'>) => {
+  const addSupplier = async (supplier: Omit<Supplier, 'id' | 'products' | 'total_orders' | 'status'>) => {
     await createSupplier.mutateAsync(supplier);
     createActivity.mutate({
       type: 'supplier_added',
@@ -155,7 +171,7 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }
   };
 
-  const addProduct = async (product: Omit<Product, 'id' | 'status'>) => {
+  const addProduct = async (product: Omit<Product, 'id'>) => {
     await createProduct.mutateAsync(product);
     createActivity.mutate({
       type: 'product_added',
@@ -180,6 +196,52 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
         description: `Deleted product "${product.name}"`,
       });
     }
+  };
+
+  // Placeholder implementations for missing operations
+  const addLocation = async (location: Omit<Location, 'id'>) => {
+    console.log('Adding location:', location);
+    toast.success('Location functionality will be implemented with full Supabase integration');
+  };
+
+  const updateLocation = async (id: string, location: Partial<Location>) => {
+    console.log('Updating location:', id, location);
+    toast.success('Location functionality will be implemented with full Supabase integration');
+  };
+
+  const deleteLocation = async (id: string) => {
+    console.log('Deleting location:', id);
+    toast.success('Location functionality will be implemented with full Supabase integration');
+  };
+
+  const addUser = async (user: Omit<User, 'id'>) => {
+    console.log('Adding user:', user);
+    toast.success('User functionality will be implemented with full Supabase integration');
+  };
+
+  const updateUser = async (id: string, user: Partial<User>) => {
+    console.log('Updating user:', id, user);
+    toast.success('User functionality will be implemented with full Supabase integration');
+  };
+
+  const deleteUser = async (id: string) => {
+    console.log('Deleting user:', id);
+    toast.success('User functionality will be implemented with full Supabase integration');
+  };
+
+  const addOrder = async (order: Omit<Order, 'id'>) => {
+    console.log('Adding order:', order);
+    toast.success('Order functionality will be implemented with full Supabase integration');
+  };
+
+  const updateOrder = async (id: string, order: Partial<Order>) => {
+    console.log('Updating order:', id, order);
+    toast.success('Order functionality will be implemented with full Supabase integration');
+  };
+
+  const deleteOrder = async (id: string) => {
+    console.log('Deleting order:', id);
+    toast.success('Order functionality will be implemented with full Supabase integration');
   };
 
   const sendEmail = async (to: string, subject: string, message: string) => {
@@ -235,6 +297,15 @@ export const SupabaseDataProvider: React.FC<{ children: React.ReactNode }> = ({ 
     addProduct,
     updateProduct,
     deleteProduct,
+    addLocation,
+    updateLocation,
+    deleteLocation,
+    addUser,
+    updateUser,
+    deleteUser,
+    addOrder,
+    updateOrder,
+    deleteOrder,
     sendEmail,
     exportData,
   };

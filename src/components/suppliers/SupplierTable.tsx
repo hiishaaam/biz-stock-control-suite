@@ -3,12 +3,12 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Mail, Trash2 } from 'lucide-react';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import EditSupplierDialog from './EditSupplierDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
 
 const SupplierTable = () => {
-  const { suppliers, sendEmail, deleteSupplier } = useAppData();
+  const { suppliers, sendEmail, deleteSupplier } = useSupabaseAppData();
   const [editingSupplierId, setEditingSupplierId] = useState<string | null>(null);
   const [deletingSupplierId, setDeletingSupplierId] = useState<string | null>(null);
 
@@ -34,6 +34,14 @@ const SupplierTable = () => {
       }
     }
   };
+
+  if (suppliers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">No suppliers found. Add your first supplier to get started.</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -73,8 +81,8 @@ const SupplierTable = () => {
                     {supplier.address && <p className="text-sm text-gray-500">{supplier.address}</p>}
                   </div>
                 </td>
-                <td className="py-4 px-4 text-gray-900 font-medium">{supplier.products}</td>
-                <td className="py-4 px-4 text-gray-900 font-medium">{supplier.totalOrders}</td>
+                <td className="py-4 px-4 text-gray-900 font-medium">{supplier.products || 0}</td>
+                <td className="py-4 px-4 text-gray-900 font-medium">{supplier.total_orders || 0}</td>
                 <td className="py-4 px-4">
                   <Badge 
                     className={supplier.status === 'active' 

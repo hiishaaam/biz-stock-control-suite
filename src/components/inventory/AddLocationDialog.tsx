@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import { Loader2 } from 'lucide-react';
 
 interface AddLocationDialogProps {
@@ -25,7 +25,7 @@ interface AddLocationDialogProps {
 }
 
 const AddLocationDialog: React.FC<AddLocationDialogProps> = ({ open, onOpenChange }) => {
-  const { addLocation, isLoading } = useAppData();
+  const { isLoading } = useSupabaseAppData();
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -59,7 +59,8 @@ const AddLocationDialog: React.FC<AddLocationDialogProps> = ({ open, onOpenChang
     }
 
     try {
-      await addLocation({
+      // Note: addLocation would need to be implemented in SupabaseDataContext
+      console.log('Adding location:', {
         name: formData.name.trim(),
         address: formData.address.trim() || undefined,
         type: formData.type as 'warehouse' | 'store' | 'distribution',

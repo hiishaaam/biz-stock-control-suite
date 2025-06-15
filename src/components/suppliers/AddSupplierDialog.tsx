@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import { Loader2 } from 'lucide-react';
 
 interface AddSupplierDialogProps {
@@ -19,7 +19,7 @@ interface AddSupplierDialogProps {
 }
 
 const AddSupplierDialog: React.FC<AddSupplierDialogProps> = ({ open, onOpenChange }) => {
-  const { addSupplier, isLoading } = useAppData();
+  const { addSupplier, isLoading } = useSupabaseAppData();
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
@@ -60,7 +60,6 @@ const AddSupplierDialog: React.FC<AddSupplierDialogProps> = ({ open, onOpenChang
         email: formData.email.trim(),
         phone: formData.phone.trim() || undefined,
         address: formData.address.trim() || undefined,
-        notes: formData.notes.trim() || undefined,
       });
 
       // Reset form and close dialog
@@ -143,17 +142,6 @@ const AddSupplierDialog: React.FC<AddSupplierDialogProps> = ({ open, onOpenChang
               value={formData.address}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               placeholder="Enter address"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Enter additional notes"
-              rows={3}
             />
           </div>
 

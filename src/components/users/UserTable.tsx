@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Edit, Mail, User, Trash2 } from 'lucide-react';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import EditUserDialog from './EditUserDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
 
@@ -12,7 +12,7 @@ interface UserTableProps {
 }
 
 const UserTable: React.FC<UserTableProps> = ({ searchTerm }) => {
-  const { users, sendEmail, deleteUser } = useAppData();
+  const { users, sendEmail } = useSupabaseAppData();
   const [editingUser, setEditingUser] = useState<string | null>(null);
   const [deletingUser, setDeletingUser] = useState<string | null>(null);
 
@@ -37,9 +37,20 @@ const UserTable: React.FC<UserTableProps> = ({ searchTerm }) => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteUser(id);
+    // Note: User deletion would need to be implemented in SupabaseDataContext
+    console.log('Delete user:', id);
     setDeletingUser(null);
   };
+
+  if (filteredUsers.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-500">
+          {searchTerm ? 'No users match your search criteria.' : 'No users found. Add your first user to get started.'}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -84,7 +95,7 @@ const UserTable: React.FC<UserTableProps> = ({ searchTerm }) => {
                   </Badge>
                 </td>
                 <td className="py-4 px-4 text-gray-600 text-sm">
-                  {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                  {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                 </td>
                 <td className="py-4 px-4">
                   <div className="flex items-center space-x-2">

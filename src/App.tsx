@@ -1,46 +1,53 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppDataProvider } from "./contexts/AppDataContext";
-import { SupabaseDataProvider } from "./contexts/SupabaseDataContext";
-import { AuthProvider } from "./contexts/AuthContext";
-import { RBACProvider } from "./contexts/RBACContext";
-import Layout from "./components/layout/Layout";
-import Dashboard from "./components/dashboard/Dashboard";
-import ProductsPage from "./components/products/ProductsPage";
-import CategoriesPage from "./components/categories/CategoriesPage";
-import InventoryPage from "./components/inventory/InventoryPage";
-import SuppliersPage from "./components/suppliers/SuppliersPage";
-import UsersPage from "./components/users/UsersPage";
-import OrdersPage from "./components/orders/OrdersPage";
-import ReportsPage from "./components/reports/ReportsPage";
-import LandingPage from "./components/landing/LandingPage";
-import LoginPage from "./components/auth/LoginPage";
-import SignUpPage from "./components/auth/SignUpPage";
-import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
-import NotFound from "./pages/NotFound";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import { SupabaseDataProvider } from '@/contexts/SupabaseDataContext';
+import { AuthProvider } from '@/contexts/AuthContext';
+import { RBACProvider } from '@/contexts/RBACContext';
+import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import Layout from '@/components/layout/Layout';
+import Dashboard from '@/components/dashboard/Dashboard';
+import ProductsPage from '@/components/products/ProductsPage';
+import SuppliersPage from '@/components/suppliers/SuppliersPage';
+import CategoriesPage from '@/components/categories/CategoriesPage';
+import InventoryPage from '@/components/inventory/InventoryPage';
+import OrdersPage from '@/components/orders/OrdersPage';
+import UsersPage from '@/components/users/UsersPage';
+import ReportsPage from '@/components/reports/ReportsPage';
+import LandingPage from '@/components/landing/LandingPage';
+import LoginPage from '@/components/auth/LoginPage';
+import SignUpPage from '@/components/auth/SignUpPage';
+import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage';
+import NotFound from '@/pages/NotFound';
+import './App.css';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      cacheTime: 10 * 60 * 1000, // 10 minutes
+    },
+  },
+});
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <SupabaseDataProvider>
-        <AppDataProvider>
-          <RBACProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <RBACProvider>
+          <SupabaseDataProvider>
+            <Router>
+              <div className="min-h-screen bg-gray-50">
                 <Routes>
+                  {/* Public routes */}
                   <Route path="/" element={<LandingPage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  
+                  {/* Protected routes */}
                   <Route path="/dashboard" element={
                     <ProtectedRoute>
                       <Layout />
@@ -48,24 +55,25 @@ const App = () => (
                   }>
                     <Route index element={<Dashboard />} />
                     <Route path="products" element={<ProductsPage />} />
+                    <Route path="suppliers" element={<SuppliersPage />} />
                     <Route path="categories" element={<CategoriesPage />} />
                     <Route path="inventory" element={<InventoryPage />} />
-                    <Route path="suppliers" element={<SuppliersPage />} />
-                    <Route path="users" element={<UsersPage />} />
                     <Route path="orders" element={<OrdersPage />} />
+                    <Route path="users" element={<UsersPage />} />
                     <Route path="reports" element={<ReportsPage />} />
-                    <Route path="settings" element={<Dashboard />} />
                   </Route>
-                  <Route path="/404" element={<NotFound />} />
+                  
+                  {/* Catch all route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-              </BrowserRouter>
-            </TooltipProvider>
-          </RBACProvider>
-        </AppDataProvider>
-      </SupabaseDataProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+                <Toaster />
+              </div>
+            </Router>
+          </SupabaseDataProvider>
+        </RBACProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

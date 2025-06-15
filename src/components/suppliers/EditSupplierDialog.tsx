@@ -9,9 +9,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import { Loader2 } from 'lucide-react';
 
 interface EditSupplierDialogProps {
@@ -21,14 +20,13 @@ interface EditSupplierDialogProps {
 }
 
 const EditSupplierDialog: React.FC<EditSupplierDialogProps> = ({ supplierId, open, onOpenChange }) => {
-  const { suppliers, updateSupplier, isLoading } = useAppData();
+  const { suppliers, updateSupplier, isLoading } = useSupabaseAppData();
   const [formData, setFormData] = useState({
     name: '',
     contact: '',
     email: '',
     phone: '',
     address: '',
-    notes: '',
     status: '' as 'active' | 'inactive' | '',
   });
 
@@ -42,7 +40,6 @@ const EditSupplierDialog: React.FC<EditSupplierDialogProps> = ({ supplierId, ope
         email: supplier.email,
         phone: supplier.phone || '',
         address: supplier.address || '',
-        notes: supplier.notes || '',
         status: supplier.status,
       });
     }
@@ -58,7 +55,6 @@ const EditSupplierDialog: React.FC<EditSupplierDialogProps> = ({ supplierId, ope
         email: formData.email.trim(),
         phone: formData.phone.trim() || undefined,
         address: formData.address.trim() || undefined,
-        notes: formData.notes.trim() || undefined,
         status: formData.status as 'active' | 'inactive',
       });
 
@@ -144,17 +140,6 @@ const EditSupplierDialog: React.FC<EditSupplierDialogProps> = ({ supplierId, ope
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Enter additional notes"
-              rows={3}
-            />
           </div>
 
           <div className="flex justify-end space-x-3 pt-4">
