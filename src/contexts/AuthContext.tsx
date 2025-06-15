@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,13 +52,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendNotificationEmail = async (email: string, type: 'welcome' | 'signin', userName?: string) => {
     try {
-      await supabase.functions.invoke('send-notification-email', {
+      console.log(`Attempting to send ${type} email to ${email}`);
+      
+      const { data, error } = await supabase.functions.invoke('send-notification-email', {
         body: {
           email,
           type,
           userName
         }
       });
+
+      console.log('Email function response:', { data, error });
+
+      if (error) {
+        console.error('Email function error:', error);
+        // Don't throw error - email is nice to have but not critical
+        return;
+      }
+
+      if (data?.error) {
+        console.error('Email service error:', data.error);
+        // Don't throw error - email is nice to have but not critical
+        return;
+      }
+
+      console.log('Email sent successfully:', data);
     } catch (error) {
       console.error('Failed to send notification email:', error);
       // Don't throw error - email is nice to have but not critical

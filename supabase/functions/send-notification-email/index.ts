@@ -10,6 +10,9 @@ const resendApiKey = Deno.env.get('RESEND_API_KEY');
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
+console.log('Email function initialized. Resend configured:', !!resend);
+console.log('Resend API Key present:', !!resendApiKey);
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -30,13 +33,22 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { email, type, userName }: EmailRequest = await req.json();
 
-    console.log(`Sending ${type} email to: ${email}`);
+    console.log(`Attempting to send ${type} email to: ${email}`);
+    console.log(`User name: ${userName || 'Not provided'}`);
 
     if (!resend) {
-      console.log('Resend not configured, skipping email send');
+      console.log('ERROR: Resend not configured - API key missing');
       return new Response(
-        JSON.stringify({ message: 'Email service not configured' }),
-        { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+        JSON.stringify({ error: 'Email service not configured - missing API key' }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    if (!resendApiKey) {
+      console.log('ERROR: RESEND_API_KEY environment variable not set');
+      return new Response(
+        JSON.stringify({ error: 'Email service not configured - API key not set' }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
@@ -50,28 +62,57 @@ const handler = async (req: Request): Promise<Response> => {
       subject = 'Sign-in Notification - InvenTrack';
       htmlContent = createSignInEmailTemplate(userName || 'User');
     } else {
+      console.log('ERROR: Invalid email type:', type);
       return new Response(
         JSON.stringify({ error: 'Invalid email type' }),
         { status: 400, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
       );
     }
 
-    await resend.emails.send({
+    console.log('Attempting to send email via Resend...');
+    console.log('Subject:', subject);
+    console.log('To:', email);
+
+    const emailResult = await resend.emails.send({
       from: 'InvenTrack <noreply@resend.dev>',
       to: [email],
       subject: subject,
       html: htmlContent,
     });
 
+    console.log('Resend response:', JSON.stringify(emailResult, null, 2));
+
+    if (emailResult.error) {
+      console.log('ERROR from Resend:', emailResult.error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to send email',
+          details: emailResult.error 
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
+
+    console.log('Email sent successfully! Email ID:', emailResult.data?.id);
+
     return new Response(
-      JSON.stringify({ message: `${type} email sent successfully` }),
+      JSON.stringify({ 
+        message: `${type} email sent successfully`,
+        emailId: emailResult.data?.id 
+      }),
       { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
 
   } catch (error: any) {
-    console.error('Error in send-notification-email function:', error);
+    console.error('Unexpected error in send-notification-email function:', error);
+    console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
+    
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message 
+      }),
       { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
   }
