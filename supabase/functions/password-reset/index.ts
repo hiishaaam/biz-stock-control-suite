@@ -140,7 +140,7 @@ async function handlePasswordResetRequest(email: string): Promise<Response> {
       const resetUrl = `${Deno.env.get('SUPABASE_URL')?.replace('supabase.co', 'lovable.app') || 'http://localhost:3000'}/reset-password?token=${token}`;
       
       await resend.emails.send({
-        from: 'InvenTrack <noreply@biz-stock-control-suit.com>',
+        from: 'InvenTrack <onboarding@resend.dev>',
         to: [email],
         subject: 'Reset Your Password - InvenTrack',
         html: createPasswordResetEmailTemplate(resetUrl, userData.user.user_metadata?.full_name || 'User'),

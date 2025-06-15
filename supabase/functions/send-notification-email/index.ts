@@ -74,7 +74,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('To:', email);
 
     const emailResult = await resend.emails.send({
-      from: 'InvenTrack <noreply@biz-stock-control-suit.com>',
+      from: 'InvenTrack <onboarding@resend.dev>',
       to: [email],
       subject: subject,
       html: htmlContent,
