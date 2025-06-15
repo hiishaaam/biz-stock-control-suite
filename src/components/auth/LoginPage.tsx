@@ -57,16 +57,16 @@ const LoginPage = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      {/* Main Content with increased padding for better scrolling */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-8 py-16">
         <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
-          {/* Brand Header with Animation */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
+          {/* Brand Header with Animation - increased margin */}
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center mb-8 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
               <Package className="w-10 h-10 text-white" />
               <Sparkles className="w-4 h-4 text-yellow-300 absolute -top-1 -right-1 animate-ping" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
               InvenTrack
             </h1>
             <p className="text-gray-600 animate-slide-in-up animation-delay-300">
@@ -74,18 +74,18 @@ const LoginPage = () => {
             </p>
           </div>
 
-          {/* Glassmorphism Card */}
-          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500">
-            <CardHeader className="text-center">
+          {/* Glassmorphism Card with extra bottom margin */}
+          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500 mb-16">
+            <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-semibold text-gray-800">Sign In</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-gray-600 mt-2">
                 Enter your credentials to access your dashboard
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Field with Animation */}
-                <div className="space-y-2">
+            <CardContent className="pb-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Email Field with Animation - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="email" 
                     className={`transition-colors duration-300 ${focusedField === 'email' ? 'text-blue-600' : 'text-gray-700'}`}
@@ -101,7 +101,7 @@ const LoginPage = () => {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Enter your email"
-                      className={`transition-all duration-300 border-2 ${
+                      className={`transition-all duration-300 border-2 h-12 ${
                         focusedField === 'email' 
                           ? 'border-blue-500 shadow-lg shadow-blue-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -114,8 +114,8 @@ const LoginPage = () => {
                   </div>
                 </div>
 
-                {/* Password Field with Animation */}
-                <div className="space-y-2">
+                {/* Password Field with Animation - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="password"
                     className={`transition-colors duration-300 ${focusedField === 'password' ? 'text-blue-600' : 'text-gray-700'}`}
@@ -131,7 +131,7 @@ const LoginPage = () => {
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Enter your password"
-                      className={`transition-all duration-300 border-2 pr-12 ${
+                      className={`transition-all duration-300 border-2 pr-12 h-12 ${
                         focusedField === 'password' 
                           ? 'border-blue-500 shadow-lg shadow-blue-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -157,8 +157,8 @@ const LoginPage = () => {
                   </div>
                 </div>
 
-                {/* Forgot Password Link */}
-                <div className="flex items-center justify-between">
+                {/* Forgot Password Link - increased spacing */}
+                <div className="flex items-center justify-between py-2">
                   <Link
                     to="/forgot-password"
                     className="text-sm text-blue-600 hover:text-purple-600 transition-colors duration-300 hover:underline"
@@ -167,10 +167,10 @@ const LoginPage = () => {
                   </Link>
                 </div>
 
-                {/* Animated Submit Button */}
+                {/* Animated Submit Button - increased height and spacing */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 group"
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 h-14 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/25 group"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -186,8 +186,8 @@ const LoginPage = () => {
                   )}
                 </Button>
 
-                {/* Sign Up Link */}
-                <div className="text-center text-sm text-gray-600">
+                {/* Sign Up Link - increased spacing */}
+                <div className="text-center text-sm text-gray-600 pt-4">
                   Don't have an account?{' '}
                   <Link 
                     to="/signup" 
