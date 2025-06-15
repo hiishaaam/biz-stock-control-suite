@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -50,6 +49,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => subscription.unsubscribe();
   }, []);
 
+  const sendNotificationEmail = async (email: string, type: 'welcome' | 'signin', userName?: string) => {
+    try {
+      await supabase.functions.invoke('send-notification-email', {
+        body: {
+          email,
+          type,
+          userName
+        }
+      });
+    } catch (error) {
+      console.error('Failed to send notification email:', error);
+      // Don't throw error - email is nice to have but not critical
+    }
+  };
+
   const signUp = async (email: string, password: string, fullName?: string) => {
     try {
       const { error } = await supabase.auth.signUp({
@@ -63,6 +77,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) throw error;
+
+      // Send welcome email
+      await sendNotificationEmail(email, 'welcome', fullName);
 
       toast({
         title: "Account created successfully!",
@@ -81,12 +98,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Send sign-in notification email
+      const userName = data.user?.user_metadata?.full_name || 'User';
+      await sendNotificationEmail(email, 'signin', userName);
 
       toast({
         title: "Welcome back!",
