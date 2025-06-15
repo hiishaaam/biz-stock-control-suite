@@ -176,6 +176,57 @@ export type Database = {
           },
         ]
       }
+      password_reset_rate_limit: {
+        Row: {
+          email: string
+          first_request_at: string
+          id: string
+          last_request_at: string
+          request_count: number | null
+        }
+        Insert: {
+          email: string
+          first_request_at?: string
+          id?: string
+          last_request_at?: string
+          request_count?: number | null
+        }
+        Update: {
+          email?: string
+          first_request_at?: string
+          id?: string
+          last_request_at?: string
+          request_count?: number | null
+        }
+        Relationships: []
+      }
+      password_reset_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          token_hash: string
+          used: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          token_hash: string
+          used?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used?: boolean | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category_id: string | null
@@ -408,6 +459,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_expired_password_reset_tokens: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_permissions: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["permission"][]

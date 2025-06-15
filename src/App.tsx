@@ -20,6 +20,7 @@ import LandingPage from '@/components/landing/LandingPage';
 import LoginPage from '@/components/auth/LoginPage';
 import SignUpPage from '@/components/auth/SignUpPage';
 import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/components/auth/ResetPasswordPage';
 import NotFound from '@/pages/NotFound';
 import './App.css';
 
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/signup" element={<SignUpPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/reset-password" element={<ResetPasswordPage />} />
                   
                   {/* Protected routes */}
                   <Route path="/dashboard" element={
