@@ -3,17 +3,21 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertTriangle, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 
 const LowStockAlert = () => {
-  const { sendEmail, suppliers } = useAppData();
+  const { sendEmail, suppliers, products } = useSupabaseAppData();
   
-  const lowStockItems = [
-    { name: 'iPhone 13 Pro', category: 'Electronics', stock: 3, threshold: 10, supplierId: 'apple' },
-    { name: 'Nike Air Max', category: 'Footwear', stock: 2, threshold: 5, supplierId: 'nike' },
-    { name: 'Coffee Beans Premium', category: 'Food', stock: 1, threshold: 8, supplierId: 'coffee-corp' },
-    { name: 'Laptop Stand', category: 'Accessories', stock: 4, threshold: 12, supplierId: 'apple' },
-  ];
+  // Calculate low stock items from actual products data
+  const lowStockItems = products.filter(product => 
+    product.stock <= product.low_stock_threshold
+  ).map(product => ({
+    name: product.name,
+    category: product.category_id || 'Unknown',
+    stock: product.stock,
+    threshold: product.low_stock_threshold,
+    supplierId: product.supplier_id
+  }));
 
   const handleReorderAll = async () => {
     try {
@@ -63,6 +67,27 @@ Inventory Management Team`;
       console.error('Failed to send restock emails:', error);
     }
   };
+
+  // Show message if no low stock items
+  if (lowStockItems.length === 0) {
+    return (
+      <Card className="border-green-200">
+        <CardHeader className="pb-2 sm:pb-6">
+          <CardTitle className="flex items-center space-x-2 text-green-700 text-lg sm:text-xl">
+            <Package className="w-5 h-5" />
+            <span>Stock Status</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Package className="w-12 h-12 text-green-600 mx-auto mb-4" />
+            <p className="text-green-700 font-medium">All items are well stocked!</p>
+            <p className="text-green-600 text-sm mt-1">No low stock alerts at this time.</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border-orange-200">
