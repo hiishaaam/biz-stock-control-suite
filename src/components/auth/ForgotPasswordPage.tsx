@@ -38,14 +38,14 @@ const ForgotPasswordPage = () => {
           <div className="absolute bottom-20 right-20 w-64 h-64 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-pulse animation-delay-2000"></div>
         </div>
 
-        <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-8 py-16">
           <div className="w-full max-w-md animate-scale-in">
-            <div className="text-center mb-8">
-              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl animate-bounce">
+            <div className="text-center mb-12">
+              <div className="mx-auto w-20 h-20 bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl flex items-center justify-center mb-8 shadow-2xl animate-bounce">
                 <CheckCircle className="w-10 h-10 text-white" />
                 <Sparkles className="w-4 h-4 text-yellow-300 absolute -top-1 -right-1 animate-ping" />
               </div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-2">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4">
                 Check Your Email
               </h1>
               <p className="text-gray-600 animate-fade-in animation-delay-300">
@@ -53,11 +53,11 @@ const ForgotPasswordPage = () => {
               </p>
             </div>
 
-            <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl">
-              <CardContent className="pt-6">
-                <div className="text-center space-y-6">
+            <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl mb-16">
+              <CardContent className="pt-8 pb-8">
+                <div className="text-center space-y-8">
                   <div className="animate-fade-in animation-delay-500">
-                    <Mail className="w-16 h-16 mx-auto text-blue-600 mb-4" />
+                    <Mail className="w-16 h-16 mx-auto text-blue-600 mb-6" />
                     <p className="text-gray-700 leading-relaxed">
                       If an account with email <strong className="text-blue-600">{email}</strong> exists, 
                       you will receive a password reset link shortly.
@@ -66,7 +66,7 @@ const ForgotPasswordPage = () => {
                   
                   <div className="pt-4 animate-slide-in-up animation-delay-700">
                     <Link to="/login">
-                      <Button variant="outline" className="w-full bg-white/50 backdrop-blur-sm border-2 border-white/30 hover:bg-white/70 transition-all duration-300 transform hover:scale-105">
+                      <Button variant="outline" className="w-full bg-white/50 backdrop-blur-sm border-2 border-white/30 hover:bg-white/70 transition-all duration-300 transform hover:scale-105 h-12">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Sign In
                       </Button>
@@ -106,14 +106,16 @@ const ForgotPasswordPage = () => {
         </div>
       </div>
 
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      {/* Main Content with increased padding for better scrolling */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-8 py-16">
         <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
+          {/* Brand Header with Animation - increased margin */}
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-orange-600 to-pink-600 rounded-2xl flex items-center justify-center mb-8 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
               <Package className="w-10 h-10 text-white" />
               <Sparkles className="w-4 h-4 text-yellow-300 absolute -top-1 -right-1 animate-ping" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-pink-600 bg-clip-text text-transparent mb-4">
               Reset Password
             </h1>
             <p className="text-gray-600 animate-slide-in-up animation-delay-300">
@@ -121,16 +123,18 @@ const ForgotPasswordPage = () => {
             </p>
           </div>
 
-          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500">
-            <CardHeader>
+          {/* Glassmorphism Card with extra bottom margin */}
+          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500 mb-16">
+            <CardHeader className="pt-8">
               <CardTitle className="text-2xl font-semibold text-gray-800">Forgot Password?</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-gray-600 mt-2">
                 No worries! Enter your email and we'll send you a link to reset your password.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
+            <CardContent className="pb-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Email Field - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="email"
                     className={`transition-colors duration-300 ${focusedField === 'email' ? 'text-orange-600' : 'text-gray-700'}`}
@@ -146,7 +150,7 @@ const ForgotPasswordPage = () => {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Enter your email"
-                      className={`transition-all duration-300 border-2 ${
+                      className={`transition-all duration-300 border-2 h-12 ${
                         focusedField === 'email' 
                           ? 'border-orange-500 shadow-lg shadow-orange-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -159,9 +163,10 @@ const ForgotPasswordPage = () => {
                   </div>
                 </div>
 
+                {/* Submit Button - increased height and spacing */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25"
+                  className="w-full bg-gradient-to-r from-orange-600 to-pink-600 hover:from-orange-700 hover:to-pink-700 text-white font-semibold py-4 h-14 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-orange-500/25"
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -177,7 +182,8 @@ const ForgotPasswordPage = () => {
                   )}
                 </Button>
 
-                <div className="text-center">
+                {/* Back Link - increased spacing */}
+                <div className="text-center pt-4">
                   <Link 
                     to="/login" 
                     className="text-sm text-orange-600 hover:text-pink-600 flex items-center justify-center transition-colors duration-300 hover:underline"

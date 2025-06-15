@@ -78,16 +78,16 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
+      {/* Main Content with increased padding for better scrolling */}
+      <div className="relative z-10 min-h-screen flex items-center justify-center p-8 py-16">
         <div className="w-full max-w-md transform transition-all duration-700 hover:scale-105">
-          {/* Brand Header with Animation */}
-          <div className="text-center mb-8 animate-fade-in">
-            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-6 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
+          {/* Brand Header with Animation - increased margin */}
+          <div className="text-center mb-12 animate-fade-in">
+            <div className="mx-auto w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center mb-8 shadow-2xl transform transition-transform duration-300 hover:rotate-12 hover:scale-110">
               <Package className="w-10 h-10 text-white" />
               <Sparkles className="w-4 h-4 text-yellow-300 absolute -top-1 -right-1 animate-ping" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
               InvenTrack
             </h1>
             <p className="text-gray-600 animate-slide-in-up animation-delay-300">
@@ -95,8 +95,8 @@ const SignUpPage = () => {
             </p>
           </div>
 
-          {/* Progress Indicator */}
-          <div className="mb-6 animate-slide-in-up animation-delay-400">
+          {/* Progress Indicator - increased spacing */}
+          <div className="mb-8 animate-slide-in-up animation-delay-400">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm text-gray-600">Progress</span>
               <span className="text-sm text-gray-600">Step 1 of 1</span>
@@ -106,18 +106,18 @@ const SignUpPage = () => {
             </div>
           </div>
 
-          {/* Glassmorphism Card */}
-          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500">
-            <CardHeader className="text-center">
+          {/* Glassmorphism Card with extra bottom margin */}
+          <Card className="backdrop-blur-xl bg-white/20 border border-white/30 shadow-2xl animate-slide-in-up animation-delay-500 mb-16">
+            <CardHeader className="text-center pt-8">
               <CardTitle className="text-2xl font-semibold text-gray-800">Create Account</CardTitle>
-              <CardDescription className="text-gray-600">
+              <CardDescription className="text-gray-600 mt-2">
                 Start your inventory management journey
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Full Name Field */}
-                <div className="space-y-2">
+            <CardContent className="pb-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Full Name Field - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="fullName"
                     className={`transition-colors duration-300 ${focusedField === 'fullName' ? 'text-purple-600' : 'text-gray-700'}`}
@@ -133,7 +133,7 @@ const SignUpPage = () => {
                       onFocus={() => setFocusedField('fullName')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Enter your full name"
-                      className={`transition-all duration-300 border-2 ${
+                      className={`transition-all duration-300 border-2 h-12 ${
                         focusedField === 'fullName' 
                           ? 'border-purple-500 shadow-lg shadow-purple-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -146,8 +146,8 @@ const SignUpPage = () => {
                   </div>
                 </div>
 
-                {/* Email Field */}
-                <div className="space-y-2">
+                {/* Email Field - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="email"
                     className={`transition-colors duration-300 ${focusedField === 'email' ? 'text-purple-600' : 'text-gray-700'}`}
@@ -163,7 +163,7 @@ const SignUpPage = () => {
                       onFocus={() => setFocusedField('email')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Enter your email"
-                      className={`transition-all duration-300 border-2 ${
+                      className={`transition-all duration-300 border-2 h-12 ${
                         focusedField === 'email' 
                           ? 'border-purple-500 shadow-lg shadow-purple-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -176,8 +176,8 @@ const SignUpPage = () => {
                   </div>
                 </div>
 
-                {/* Password Field with Strength Indicator */}
-                <div className="space-y-2">
+                {/* Password Field with Strength Indicator - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="password"
                     className={`transition-colors duration-300 ${focusedField === 'password' ? 'text-purple-600' : 'text-gray-700'}`}
@@ -193,7 +193,7 @@ const SignUpPage = () => {
                       onFocus={() => setFocusedField('password')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Create a strong password"
-                      className={`transition-all duration-300 border-2 pr-12 ${
+                      className={`transition-all duration-300 border-2 pr-12 h-12 ${
                         focusedField === 'password' 
                           ? 'border-purple-500 shadow-lg shadow-purple-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -235,8 +235,8 @@ const SignUpPage = () => {
                   )}
                 </div>
 
-                {/* Confirm Password Field */}
-                <div className="space-y-2">
+                {/* Confirm Password Field - increased spacing */}
+                <div className="space-y-3">
                   <Label 
                     htmlFor="confirmPassword"
                     className={`transition-colors duration-300 ${focusedField === 'confirmPassword' ? 'text-purple-600' : 'text-gray-700'}`}
@@ -252,7 +252,7 @@ const SignUpPage = () => {
                       onFocus={() => setFocusedField('confirmPassword')}
                       onBlur={() => setFocusedField(null)}
                       placeholder="Confirm your password"
-                      className={`transition-all duration-300 border-2 ${
+                      className={`transition-all duration-300 border-2 h-12 ${
                         focusedField === 'confirmPassword' 
                           ? 'border-purple-500 shadow-lg shadow-purple-500/25 scale-105' 
                           : 'border-gray-200 hover:border-gray-300'
@@ -283,10 +283,10 @@ const SignUpPage = () => {
                   )}
                 </div>
 
-                {/* Animated Submit Button */}
+                {/* Animated Submit Button - increased height and spacing */}
                 <Button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-3 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25 group"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold py-4 h-14 rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/25 group"
                   disabled={isLoading || password !== confirmPassword}
                 >
                   {isLoading ? (
@@ -302,8 +302,8 @@ const SignUpPage = () => {
                   )}
                 </Button>
 
-                {/* Sign In Link */}
-                <div className="text-center text-sm text-gray-600">
+                {/* Sign In Link - increased spacing */}
+                <div className="text-center text-sm text-gray-600 pt-4">
                   Already have an account?{' '}
                   <Link 
                     to="/login" 
