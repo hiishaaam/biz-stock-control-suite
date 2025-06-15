@@ -2,11 +2,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, User, Archive, CheckCircle, Mail, Download, Edit, Trash2, Plus } from 'lucide-react';
-import { useAppData } from '@/contexts/AppDataContext';
+import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import { formatDistanceToNow } from 'date-fns';
 
 const RecentActivity = () => {
-  const { activities } = useAppData();
+  const { activities } = useSupabaseAppData();
 
   const getActivityIcon = (type: string) => {
     switch (type) {
