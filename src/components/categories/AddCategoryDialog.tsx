@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Dialog,
@@ -11,7 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface AddCategoryDialogProps {
   open: boolean;
@@ -19,7 +19,7 @@ interface AddCategoryDialogProps {
 }
 
 const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChange }) => {
-  const { addCategory } = useSupabaseAppData();
+  const { addCategory, categories } = useSupabaseAppData();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -32,6 +32,14 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
 
     if (!formData.name.trim()) {
       newErrors.name = 'Category name is required';
+    } else {
+      // Check if category name already exists (case-insensitive)
+      const existingCategory = categories.find(
+        cat => cat.name.toLowerCase() === formData.name.trim().toLowerCase()
+      );
+      if (existingCategory) {
+        newErrors.name = 'A category with this name already exists';
+      }
     }
 
     setErrors(newErrors);
@@ -56,19 +64,46 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
       setFormData({ name: '', description: '' });
       setErrors({});
       onOpenChange(false);
-    } catch (error) {
-      // Error is handled in the context
+    } catch (error: any) {
+      // Handle specific duplicate key error
+      if (error.message?.includes('duplicate key value violates unique constraint')) {
+        setErrors({ name: 'A category with this name already exists' });
+      } else {
+        // Other errors are handled in the context
+        console.error('Category creation error:', error);
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setFormData({ ...formData, name: value });
+    
+    // Clear name error when user starts typing
+    if (errors.name && value.trim()) {
+      setErrors({ ...errors, name: '' });
+    }
+  };
+
+  const existingCategoryNames = categories.map(cat => cat.name).sort();
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Category</DialogTitle>
         </DialogHeader>
+        
+        {existingCategoryNames.length > 0 && (
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              <strong>Existing categories:</strong> {existingCategoryNames.join(', ')}
+            </AlertDescription>
+          </Alert>
+        )}
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -76,7 +111,7 @@ const AddCategoryDialog: React.FC<AddCategoryDialogProps> = ({ open, onOpenChang
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={handleNameChange}
               placeholder="Enter category name"
               className={errors.name ? 'border-red-500' : ''}
             />
