@@ -7,6 +7,7 @@ import { Edit, Package, Trash2 } from 'lucide-react';
 import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import EditCategoryDialog from './EditCategoryDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
+import PermissionGuard from '@/components/rbac/PermissionGuard';
 
 const CategoryGrid = () => {
   const { categories, deleteCategory } = useSupabaseAppData();
@@ -23,6 +24,16 @@ const CategoryGrid = () => {
     // This will be calculated from actual products once we implement the relationship
     return Math.floor(Math.random() * 50) + 1;
   };
+
+  if (categories.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+        <p>No categories found</p>
+        <p className="text-sm">Create your first category to get started</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -43,21 +54,25 @@ const CategoryGrid = () => {
                   </div>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setEditingCategory(category.id)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setDeletingCategory(category.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <PermissionGuard permission="edit_categories">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setEditingCategory(category.id)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </PermissionGuard>
+                  <PermissionGuard permission="delete_categories">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setDeletingCategory(category.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </PermissionGuard>
                 </div>
               </div>
             </CardHeader>
@@ -73,21 +88,25 @@ const CategoryGrid = () => {
       </div>
 
       {editingCategory && (
-        <EditCategoryDialog 
-          categoryId={editingCategory}
-          open={!!editingCategory}
-          onOpenChange={() => setEditingCategory(null)}
-        />
+        <PermissionGuard permission="edit_categories">
+          <EditCategoryDialog 
+            categoryId={editingCategory}
+            open={!!editingCategory}
+            onOpenChange={() => setEditingCategory(null)}
+          />
+        </PermissionGuard>
       )}
 
       {deletingCategory && (
-        <DeleteConfirmDialog
-          open={!!deletingCategory}
-          onOpenChange={() => setDeletingCategory(null)}
-          onConfirm={() => handleDelete(deletingCategory)}
-          title="Delete Category"
-          description="Are you sure you want to delete this category? This action cannot be undone."
-        />
+        <PermissionGuard permission="delete_categories">
+          <DeleteConfirmDialog
+            open={!!deletingCategory}
+            onOpenChange={() => setDeletingCategory(null)}
+            onConfirm={() => handleDelete(deletingCategory)}
+            title="Delete Category"
+            description="Are you sure you want to delete this category? This action cannot be undone."
+          />
+        </PermissionGuard>
       )}
     </>
   );
