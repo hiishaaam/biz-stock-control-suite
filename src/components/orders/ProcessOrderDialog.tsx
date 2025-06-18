@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Loader2, Package, AlertTriangle } from 'lucide-react';
-import { useProcessOrder } from '@/hooks/useOrderProcessing';
+import { useProcessOrder, type ProcessOrderItem } from '@/hooks/useOrderProcessing';
 import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import InsufficientStockAlert from './InsufficientStockAlert';
 
@@ -30,12 +30,15 @@ const ProcessOrderDialog: React.FC<ProcessOrderDialogProps> = ({
   const order = orders.find(o => o.id === orderId);
 
   const handleProcessOrder = async () => {
-    if (!order || !order.items) return;
+    if (!order || !order.items || order.items.length === 0) {
+      console.error('Order or order items not found');
+      return;
+    }
 
     try {
       setInsufficientItems([]);
       
-      const orderItems = order.items.map(item => ({
+      const orderItems: ProcessOrderItem[] = order.items.map(item => ({
         product_id: item.productId,
         quantity: item.quantity,
         unit_price: item.price,
@@ -70,7 +73,7 @@ const ProcessOrderDialog: React.FC<ProcessOrderDialogProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center space-x-2">
             <Package className="w-5 h-5" />
-            <span>Process Order - {order.orderNumber}</span>
+            <span>Process Order - {order.order_number}</span>
           </DialogTitle>
         </DialogHeader>
         
@@ -80,11 +83,11 @@ const ProcessOrderDialog: React.FC<ProcessOrderDialogProps> = ({
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span>Order Number:</span>
-                <span className="font-medium">{order.orderNumber}</span>
+                <span className="font-medium">{order.order_number}</span>
               </div>
               <div className="flex justify-between">
                 <span>Total Amount:</span>
-                <span className="font-medium">${order.totalAmount.toLocaleString()}</span>
+                <span className="font-medium">${order.total_amount.toLocaleString()}</span>
               </div>
               <div className="flex justify-between">
                 <span>Status:</span>
@@ -93,31 +96,33 @@ const ProcessOrderDialog: React.FC<ProcessOrderDialogProps> = ({
             </div>
           </div>
 
-          <div>
-            <h3 className="font-medium mb-2">Items to Process</h3>
-            <div className="border rounded-lg">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="text-left p-3 text-sm font-medium">Product</th>
-                    <th className="text-left p-3 text-sm font-medium">Quantity</th>
-                    <th className="text-left p-3 text-sm font-medium">Price</th>
-                    <th className="text-left p-3 text-sm font-medium">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items?.map((item, index) => (
-                    <tr key={index} className="border-t">
-                      <td className="p-3">{getProductName(item.productId)}</td>
-                      <td className="p-3">{item.quantity}</td>
-                      <td className="p-3">${item.price.toFixed(2)}</td>
-                      <td className="p-3">${(item.price * item.quantity).toFixed(2)}</td>
+          {order.items && order.items.length > 0 && (
+            <div>
+              <h3 className="font-medium mb-2">Items to Process</h3>
+              <div className="border rounded-lg">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="text-left p-3 text-sm font-medium">Product</th>
+                      <th className="text-left p-3 text-sm font-medium">Quantity</th>
+                      <th className="text-left p-3 text-sm font-medium">Price</th>
+                      <th className="text-left p-3 text-sm font-medium">Total</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {order.items.map((item, index) => (
+                      <tr key={index} className="border-t">
+                        <td className="p-3">{getProductName(item.productId)}</td>
+                        <td className="p-3">{item.quantity}</td>
+                        <td className="p-3">${item.price.toFixed(2)}</td>
+                        <td className="p-3">${(item.price * item.quantity).toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
-          </div>
+          )}
 
           {insufficientItems.length > 0 && (
             <InsufficientStockAlert 
@@ -150,7 +155,7 @@ const ProcessOrderDialog: React.FC<ProcessOrderDialogProps> = ({
             </Button>
             <Button 
               onClick={handleProcessOrder}
-              disabled={processOrder.isPending || order.status !== 'confirmed'}
+              disabled={processOrder.isPending || order.status !== 'confirmed' || !order.items || order.items.length === 0}
               className="bg-blue-600 hover:bg-blue-700"
             >
               {processOrder.isPending ? (

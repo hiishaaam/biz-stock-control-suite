@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-export interface OrderItem {
+// Define a simpler interface for the order processing
+export interface ProcessOrderItem {
   product_id: string;
   quantity: number;
   unit_price: number;
@@ -12,7 +13,7 @@ export interface OrderItem {
 
 export interface ProcessOrderRequest {
   order_id: string;
-  items: OrderItem[];
+  items: ProcessOrderItem[];
 }
 
 export interface StockUpdate {
@@ -43,9 +44,17 @@ export const useProcessOrder = () => {
     mutationFn: async ({ order_id, items }: ProcessOrderRequest): Promise<ProcessOrderResponse> => {
       console.log('Processing order:', order_id, 'with items:', items);
 
+      // Convert items to the format expected by the database function
+      const dbItems = items.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        unit_price: item.unit_price,
+        total_price: item.total_price
+      }));
+
       const { data, error } = await supabase.rpc('process_order_with_stock_reduction', {
         p_order_id: order_id,
-        p_order_items: items
+        p_order_items: dbItems as any // Use 'any' to handle the Json type conversion
       });
 
       if (error) {
@@ -54,7 +63,13 @@ export const useProcessOrder = () => {
       }
 
       console.log('Order processing result:', data);
-      return data as ProcessOrderResponse;
+      
+      // Ensure we return the correct type
+      if (data && typeof data === 'object' && 'success' in data) {
+        return data as ProcessOrderResponse;
+      } else {
+        throw new Error('Invalid response from order processing function');
+      }
     },
     onSuccess: (data) => {
       if (data.success) {
