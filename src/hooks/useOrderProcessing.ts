@@ -37,6 +37,28 @@ export interface ProcessOrderResponse {
   stock_updates?: StockUpdate[];
 }
 
+// Helper function to safely convert Supabase response to our type
+const parseProcessOrderResponse = (data: any): ProcessOrderResponse => {
+  // Ensure we have a valid response object
+  if (!data || typeof data !== 'object') {
+    throw new Error('Invalid response from order processing function');
+  }
+
+  // Check if it has the required success property
+  if (typeof data.success !== 'boolean') {
+    throw new Error('Invalid response format: missing success property');
+  }
+
+  // Return the data with proper typing
+  return {
+    success: data.success,
+    message: data.message || undefined,
+    error: data.error || undefined,
+    insufficient_items: data.insufficient_items || undefined,
+    stock_updates: data.stock_updates || undefined,
+  };
+};
+
 export const useProcessOrder = () => {
   const queryClient = useQueryClient();
 
@@ -64,12 +86,8 @@ export const useProcessOrder = () => {
 
       console.log('Order processing result:', data);
       
-      // Ensure we return the correct type
-      if (data && typeof data === 'object' && 'success' in data) {
-        return data as ProcessOrderResponse;
-      } else {
-        throw new Error('Invalid response from order processing function');
-      }
+      // Use our helper function to safely parse the response
+      return parseProcessOrderResponse(data);
     },
     onSuccess: (data) => {
       if (data.success) {
