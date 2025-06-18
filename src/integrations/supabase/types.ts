@@ -236,11 +236,8 @@ export type Database = {
           description: string | null
           id: string
           low_stock_threshold: number | null
-          max_stock: number | null
           name: string
           price: number
-          reorder_point: number | null
-          reserved_stock: number | null
           sku: string
           stock: number | null
           supplier_id: string | null
@@ -254,11 +251,8 @@ export type Database = {
           description?: string | null
           id?: string
           low_stock_threshold?: number | null
-          max_stock?: number | null
           name: string
           price: number
-          reorder_point?: number | null
-          reserved_stock?: number | null
           sku: string
           stock?: number | null
           supplier_id?: string | null
@@ -272,11 +266,8 @@ export type Database = {
           description?: string | null
           id?: string
           low_stock_threshold?: number | null
-          max_stock?: number | null
           name?: string
           price?: number
-          reorder_point?: number | null
-          reserved_stock?: number | null
           sku?: string
           stock?: number | null
           supplier_id?: string | null
@@ -346,56 +337,6 @@ export type Database = {
           role?: Database["public"]["Enums"]["app_role"]
         }
         Relationships: []
-      }
-      stock_movements: {
-        Row: {
-          created_at: string | null
-          created_by: string | null
-          id: string
-          movement_type: string
-          new_stock: number
-          previous_stock: number
-          product_id: string | null
-          quantity: number
-          reason: string | null
-          reference_id: string | null
-          reference_type: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          movement_type: string
-          new_stock: number
-          previous_stock: number
-          product_id?: string | null
-          quantity: number
-          reason?: string | null
-          reference_id?: string | null
-          reference_type?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          created_by?: string | null
-          id?: string
-          movement_type?: string
-          new_stock?: number
-          previous_stock?: number
-          product_id?: string | null
-          quantity?: number
-          reason?: string | null
-          reference_id?: string | null
-          reference_type?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "stock_movements_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       suppliers: {
         Row: {
@@ -522,16 +463,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
-      get_low_stock_products: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          product_id: string
-          product_name: string
-          current_stock: number
-          threshold: number
-          available_stock: number
-        }[]
-      }
       get_user_permissions: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["permission"][]
@@ -553,10 +484,6 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
-      }
-      process_order_with_stock_reduction: {
-        Args: { p_order_id: string; p_order_items: Json }
-        Returns: Json
       }
     }
     Enums: {

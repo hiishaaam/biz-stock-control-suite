@@ -5,7 +5,6 @@ import { Database, AlertTriangle, TrendingUp } from 'lucide-react';
 import { useSupabaseAppData } from '@/contexts/SupabaseDataContext';
 import StockOverview from './StockOverview';
 import LocationManager from './LocationManager';
-import StockMovementsHistory from './StockMovementsHistory';
 
 const InventoryPage = () => {
   const { products } = useSupabaseAppData();
@@ -77,9 +76,6 @@ const InventoryPage = () => {
 
       {/* Stock Overview */}
       <StockOverview />
-      
-      {/* Stock Movements History */}
-      <StockMovementsHistory />
       
       {/* Location Manager */}
       <LocationManager />

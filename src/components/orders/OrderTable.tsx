@@ -2,11 +2,10 @@
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Mail, ShoppingCart, Trash2, Eye, Cog } from 'lucide-react';
+import { Edit, Mail, ShoppingCart, Trash2, Eye } from 'lucide-react';
 import { useAppData } from '@/contexts/AppDataContext';
 import EditOrderDialog from './EditOrderDialog';
 import DeleteConfirmDialog from '../shared/DeleteConfirmDialog';
-import ProcessOrderDialog from './ProcessOrderDialog';
 
 interface OrderTableProps {
   searchTerm: string;
@@ -16,7 +15,6 @@ const OrderTable: React.FC<OrderTableProps> = ({ searchTerm }) => {
   const { orders, suppliers, sendEmail, deleteOrder } = useAppData();
   const [editingOrder, setEditingOrder] = useState<string | null>(null);
   const [deletingOrder, setDeletingOrder] = useState<string | null>(null);
-  const [processingOrder, setProcessingOrder] = useState<string | null>(null);
 
   const getSupplierName = (supplierId: string) => {
     const supplier = suppliers.find(s => s.id === supplierId);
@@ -113,17 +111,6 @@ const OrderTable: React.FC<OrderTableProps> = ({ searchTerm }) => {
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    {order.status === 'confirmed' && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => setProcessingOrder(order.id)}
-                        title="Process Order"
-                        className="text-blue-600 hover:text-blue-700"
-                      >
-                        <Cog className="w-4 h-4" />
-                      </Button>
-                    )}
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -164,14 +151,6 @@ const OrderTable: React.FC<OrderTableProps> = ({ searchTerm }) => {
           onConfirm={() => handleDelete(deletingOrder)}
           title="Delete Order"
           description="Are you sure you want to delete this order? This action cannot be undone."
-        />
-      )}
-
-      {processingOrder && (
-        <ProcessOrderDialog
-          open={!!processingOrder}
-          onOpenChange={() => setProcessingOrder(null)}
-          orderId={processingOrder}
         />
       )}
     </>
